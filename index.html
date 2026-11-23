@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>مفكرة الشراء الخاصة - أبو فيروزة</title>
+  <title>مستشار المشتريات الذكي - أبو فيروزة</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -25,102 +25,137 @@
     .brand-border { border-color: var(--primary); }
   </style>
 </head>
-<body class="pb-12">
+<body class="pb-16">
 
-  <header class="brand-bg text-white p-4 shadow-md sticky top-0 z-10">
-    <div class="max-w-4xl mx-auto flex justify-between items-center">
+  <!-- الشريط العلوي -->
+  <header class="brand-bg text-white p-3.5 shadow-md sticky top-0 z-20">
+    <div class="max-w-xl mx-auto flex justify-between items-center">
       <div>
-        <h1 class="text-lg font-extrabold">مفكرة الشراء الخاصة - أبو فيروزة</h1>
-        <p class="text-xs text-teal-100">تحليل أسعار الموردين، الجملة المقترحة، ومفرد السوق العراقي</p>
+        <h1 class="text-base font-extrabold">مستشار المشتريات وبنك الموردين</h1>
+        <p class="text-[11px] text-teal-100">مكتب أثير العريبي • فحص فوري وحماية السيولة</p>
       </div>
-      <button onclick="toggleSettings()" class="bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 shadow-sm">
-        ⚙️ المفاتيح
-      </button>
+      <div class="flex gap-1.5">
+        <button onclick="toggleArchive()" class="bg-teal-800 hover:bg-teal-900 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
+          📒 الأرشيف (<span id="archiveCount">0</span>)
+        </button>
+        <button onclick="toggleSettings()" class="bg-teal-700 hover:bg-teal-800 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm">
+          ⚙️
+        </button>
+      </div>
     </div>
   </header>
 
-  <main class="max-w-4xl mx-auto p-4 space-y-4">
+  <main class="max-w-xl mx-auto p-3.5 space-y-3.5">
 
     <!-- صندوق إدخال المفاتيح -->
     <div id="settingsBox" class="hidden bg-white p-4 rounded-xl shadow border border-teal-200 space-y-3">
       <div>
-        <label class="block text-sm font-bold brand-text mb-1">1. مفتاح Gemini API Key (الأساسي):</label>
-        <input type="password" id="apiKeyInput" placeholder="ألصق مفتاح جوجل هنا (AIzaSy...)" class="w-full border rounded-lg px-3 py-2 text-sm text-left focus:outline-none focus:border-teal-600" dir="ltr" />
+        <label class="block text-xs font-bold brand-text mb-1">1. مفتاح Gemini API Key (الأساسي):</label>
+        <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full border rounded-lg px-3 py-2 text-xs text-left focus:outline-none focus:border-teal-600" dir="ltr" />
       </div>
-
       <div>
-        <label class="block text-sm font-bold text-gray-700 mb-1">2. مفتاح OpenRouter API Key (احتياطي اختياري):</label>
-        <input type="password" id="openRouterKeyInput" placeholder="ألصق مفتاح OpenRouter هنا (sk-or-...)" class="w-full border rounded-lg px-3 py-2 text-sm text-left focus:outline-none focus:border-teal-600" dir="ltr" />
+        <label class="block text-xs font-bold text-gray-700 mb-1">2. مفتاح OpenRouter API Key (احتياطي):</label>
+        <input type="password" id="openRouterKeyInput" placeholder="sk-or-..." class="w-full border rounded-lg px-3 py-2 text-xs text-left focus:outline-none focus:border-teal-600" dir="ltr" />
       </div>
+      <div class="flex justify-end">
+        <button onclick="saveKeys()" class="brand-bg text-white px-4 py-1.5 rounded-lg text-xs font-bold">حفظ المفاتيح</button>
+      </div>
+    </div>
 
-      <div class="flex justify-between items-center pt-1">
-        <p class="text-xs text-gray-500">* تُحفظ في متصفحك الشخصي فقط.</p>
-        <button onclick="saveKeys()" class="brand-bg text-white px-5 py-2 rounded-lg text-sm font-bold">حفظ المفاتيح</button>
+    <!-- صندوق بنك أسعار الموردين (شركة الهدى وغيرها) -->
+    <div id="archiveBox" class="hidden bg-white p-4 rounded-xl shadow border border-amber-200 space-y-3">
+      <div class="flex justify-between items-center border-b pb-2">
+        <h2 class="text-sm font-extrabold text-amber-800">📒 بنك أسعار الموردين المحفوظة</h2>
+        <button onclick="clearArchive()" class="text-[11px] text-red-600 font-bold underline">مسح الكل</button>
       </div>
+      <input type="text" id="archiveSearch" oninput="renderArchiveList()" placeholder="ابحث باسم الصنف أو اسم المورد (مثلاً: الهدى)..." class="w-full border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500" />
+      <div id="archiveList" class="max-h-64 overflow-y-auto divide-y text-xs"></div>
     </div>
 
     <!-- التبويبات -->
-    <div class="grid grid-cols-2 gap-2 bg-white p-1.5 rounded-xl shadow-sm">
-      <button id="tab-image" onclick="switchTab('image')" class="brand-bg text-white py-2 rounded-lg text-sm font-bold transition">📸 فحص صورة</button>
-      <button id="tab-text" onclick="switchTab('text')" class="text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition">📝 نص / قائمة</button>
+    <div class="grid grid-cols-2 gap-2 bg-white p-1 rounded-xl shadow-sm">
+      <button id="tab-image" onclick="switchTab('image')" class="brand-bg text-white py-2 rounded-lg text-xs font-bold transition">📸 تصوير عند المورد</button>
+      <button id="tab-text" onclick="switchTab('text')" class="text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-xs font-bold transition">📝 كتابة / لصق سعر</button>
+    </div>
+
+    <!-- أزرار الاختيار السريع للمنشأ والحجم والمورد -->
+    <div class="bg-white p-3 rounded-xl shadow-sm space-y-2.5">
+      <div>
+        <span class="block text-[11px] font-bold text-gray-500 mb-1">المنشأ:</span>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="selectChip('origin', 'تلقائي', this)" class="chip-origin bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">تلقائي</button>
+          <button type="button" onclick="selectChip('origin', 'صيني', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇨🇳 صيني</button>
+          <button type="button" onclick="selectChip('origin', 'إيراني', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇮🇷 إيراني</button>
+          <button type="button" onclick="selectChip('origin', 'تركي', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇹🇷 تركي</button>
+          <button type="button" onclick="selectChip('origin', 'عراقي', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇮🇶 عراقي</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="block text-[11px] font-bold text-gray-500 mb-1">الحجم / النوع:</span>
+        <div class="flex flex-wrap gap-1.5">
+          <button type="button" onclick="selectChip('size', 'تلقائي', this)" class="chip-size bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">تلقائي</button>
+          <button type="button" onclick="selectChip('size', 'صغير', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">صغير</button>
+          <button type="button" onclick="selectChip('size', 'وسط', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">وسط</button>
+          <button type="button" onclick="selectChip('size', 'كبير', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">كبير</button>
+          <button type="button" onclick="selectChip('size', 'سيت كامل', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">سيت كامل</button>
+          <button type="button" onclick="selectChip('size', 'زجاج/قابل للكسر', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🍷 قابل للكسر</button>
+        </div>
+      </div>
+
+      <!-- بيانات المخزن المصغرة (لمحاكاة الربط مع نظام العريبي) -->
+      <div class="grid grid-cols-2 gap-2 pt-1 border-t">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 mb-0.5">اسم المورد الحالي:</label>
+          <input type="text" id="supplierNameInput" placeholder="مثلاً: شركة الهدى" class="w-full border rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-teal-600 bg-gray-50" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 mb-0.5">رصيدك الحالي بالمحل (اختياري):</label>
+          <input type="number" id="currentStockInput" placeholder="0" class="w-full border rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-teal-600 bg-gray-50" />
+        </div>
+      </div>
     </div>
 
     <!-- قسم فحص الصورة -->
-    <div id="section-image" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-      <label class="block text-sm font-bold text-gray-700">التقط صورة أو اختر لقطة شاشة لمنتج أو قائمة:</label>
-      <input type="file" id="imageInput" accept="image/*" onchange="previewAndCompressImage(event)" class="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 border rounded-lg p-1.5" />
+    <div id="section-image" class="bg-white p-3.5 rounded-xl shadow-sm space-y-3">
+      <input type="file" id="imageInput" accept="image/*" capture="environment" onchange="previewAndCompressImage(event)" class="block w-full text-xs text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-700 border rounded-lg p-1.5" />
       
       <div id="imagePreviewContainer" class="hidden text-center">
-        <img id="imagePreview" class="max-h-56 mx-auto rounded-lg border shadow-sm object-contain" />
-        <p id="imageSizeInfo" class="text-[11px] text-teal-700 font-bold mt-1"></p>
+        <img id="imagePreview" class="max-h-48 mx-auto rounded-lg border shadow-sm object-contain" />
+        <p id="imageSizeInfo" class="text-[10px] text-teal-700 font-bold mt-1"></p>
       </div>
 
-      <input type="text" id="imageNote" placeholder="ملاحظة إضافية (مثلاً: سعر الكرتون 24 قطعة، أو السعر بالدولار)" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600" />
+      <input type="text" id="imageNote" placeholder="سعر المورد أو ملاحظة (مثلاً: بـ 3500 أو كرتون 24 قطعة)" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-teal-600" />
       
-      <button id="btnAnalyzeImage" onclick="analyzeImage()" class="w-full brand-bg text-white py-2.5 rounded-lg font-bold text-sm shadow">
-        ⚡ استخرج وحلل الجدول الكامل
+      <button id="btnAnalyzeImage" onclick="analyzeImage()" class="w-full brand-bg text-white py-3 rounded-xl font-extrabold text-sm shadow-md">
+        ⚡ افحص القرار والكمية الذهبية
       </button>
     </div>
 
     <!-- قسم فحص النص -->
-    <div id="section-text" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3">
-      <label class="block text-sm font-bold text-gray-700">ألصق قائمة الأسعار أو تفاصيل المنتجات هنا:</label>
-      <textarea id="textInput" rows="5" placeholder="مثال:&#10;طقم بهارات 7 قطع بسعر 12,000&#10;ترمس شاي 1 لتر بسعر 9,500" class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:border-teal-600"></textarea>
+    <div id="section-text" class="hidden bg-white p-3.5 rounded-xl shadow-sm space-y-3">
+      <textarea id="textInput" rows="3" placeholder="اكتب اسم المنتج وسعر المورد هنا...&#10;مثال: ترمس شاي إيراني 1 لتر سعر المورد 8500" class="w-full border rounded-lg p-2.5 text-xs focus:outline-none focus:border-teal-600"></textarea>
       
-      <button id="btnAnalyzeText" onclick="analyzeText()" class="w-full brand-bg text-white py-2.5 rounded-lg font-bold text-sm shadow">
-        ⚡ حلل القائمة والجدول الكامل
+      <button id="btnAnalyzeText" onclick="analyzeText()" class="w-full brand-bg text-white py-3 rounded-xl font-extrabold text-sm shadow-md">
+        ⚡ افحص القرار والكمية الذهبية
       </button>
     </div>
 
-    <!-- صندوق النتائج -->
-    <div id="resultBox" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3 border-t-4 brand-border">
-      <div class="flex justify-between items-center gap-2">
-        <h2 class="font-extrabold text-base brand-text">نتيجة التحليل وتوصية الشراء:</h2>
-        <span id="usedModelBadge" class="hidden text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-bold" dir="ltr"></span>
+    <!-- صندوق بطاقات القرار السريعة -->
+    <div id="resultBox" class="hidden space-y-3">
+      <div class="flex justify-between items-center px-1">
+        <span class="text-xs font-extrabold brand-text">نتيجة التحليل الاقتصادي والميداني:</span>
+        <span id="usedModelBadge" class="hidden text-[10px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-bold" dir="ltr"></span>
       </div>
-      
-      <div id="loadingMsg" class="hidden text-center py-4 text-sm font-bold text-teal-700">
-        ⚡ جاري التحليل السريع...
+
+      <div id="loadingMsg" class="hidden bg-white p-6 rounded-xl shadow-sm text-center text-sm font-bold text-teal-700">
+        ⚡ جاري حساب السعر الصافي، الموسم، والكمية المثالية...
       </div>
-      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-xs font-bold leading-relaxed" dir="ltr"></div>
-      
-      <div id="tableContainer" class="hidden overflow-x-auto pb-2">
-        <table class="w-full text-right border-collapse text-xs min-w-[680px]">
-          <thead>
-            <tr class="bg-teal-50 text-teal-900 border-b">
-              <th class="p-2.5">المنتج</th>
-              <th class="p-2.5">سعر المورد الحالي</th>
-              <th class="p-2.5">سعر المورد الجيد</th>
-              <th class="p-2.5">جملة السوق</th>
-              <th class="p-2.5 bg-teal-100/70">بيعنا جملة (مقترح)</th>
-              <th class="p-2.5">مفرد السوق</th>
-              <th class="p-2.5">هل يستحق الشراء؟</th>
-            </tr>
-          </thead>
-          <tbody id="resultTableBody" class="divide-y"></tbody>
-        </table>
-      </div>
-      <p class="text-[11px] text-gray-400 text-left sm:hidden">← اسحب الجدول لليسار لرؤية باقي الأعمدة</p>
+
+      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-xl text-xs font-bold border border-red-200" dir="ltr"></div>
+
+      <!-- حاوية البطاقات الذكية -->
+      <div id="cardsContainer" class="space-y-3"></div>
     </div>
 
   </main>
@@ -134,337 +169,50 @@
 
     let base64Image = "";
     let imageMimeType = "image/jpeg";
+    let selectedOrigin = "تلقائي";
+    let selectedSize = "تلقائي";
+    let lastAnalyzedItems = [];
 
     window.onload = () => {
       const savedGemini = localStorage.getItem("gemini_api_key");
       const savedOR = localStorage.getItem("openrouter_api_key");
-      
       if (savedGemini) document.getElementById("apiKeyInput").value = savedGemini;
       if (savedOR) document.getElementById("openRouterKeyInput").value = savedOR;
-
-      if (!savedGemini && !savedOR) {
-        document.getElementById("settingsBox").classList.remove("hidden");
-      }
+      if (!savedGemini && !savedOR) document.getElementById("settingsBox").classList.remove("hidden");
+      updateArchiveCount();
     };
+
+    function selectChip(type, val, el) {
+      if (type === "origin") selectedOrigin = val;
+      if (type === "size") selectedSize = val;
+      document.querySelectorAll(`.chip-${type}`).forEach(btn => {
+        btn.className = `chip-${type} bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold`;
+      });
+      el.className = `chip-${type} bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold`;
+    }
 
     function toggleSettings() {
       document.getElementById("settingsBox").classList.toggle("hidden");
     }
 
+    function toggleArchive() {
+      const box = document.getElementById("archiveBox");
+      box.classList.toggle("hidden");
+      if (!box.classList.contains("hidden")) renderArchiveList();
+    }
+
     function saveKeys() {
       const geminiKey = document.getElementById("apiKeyInput").value.trim();
       const orKey = document.getElementById("openRouterKeyInput").value.trim();
-
-      if (!geminiKey && !orKey) {
-        return alert("يرجى إدخال مفتاح واحد على الأقل.");
-      }
-
+      if (!geminiKey && !orKey) return alert("يرجى إدخال مفتاح واحد على الأقل.");
       localStorage.setItem("gemini_api_key", geminiKey);
       localStorage.setItem("openrouter_api_key", orKey);
       localStorage.removeItem("cached_fast_gemini_model");
-      alert("✅ تم حفظ المفاتيح بنجاح!");
+      alert("✅ تم الحفظ!");
       document.getElementById("settingsBox").classList.add("hidden");
     }
 
     function switchTab(tab) {
       const isImg = tab === "image";
       document.getElementById("section-image").classList.toggle("hidden", !isImg);
-      document.getElementById("section-text").classList.toggle("hidden", isImg);
-      
-      document.getElementById("tab-image").className = isImg 
-        ? "brand-bg text-white py-2 rounded-lg text-sm font-bold transition" 
-        : "text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition";
-      document.getElementById("tab-text").className = !isImg 
-        ? "brand-bg text-white py-2 rounded-lg text-sm font-bold transition" 
-        : "text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition";
-    }
-
-    function previewAndCompressImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const MAX_WIDTH = 1024;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, width, height);
-
-          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
-          document.getElementById("imagePreview").src = compressedDataUrl;
-          document.getElementById("imagePreviewContainer").classList.remove("hidden");
-
-          base64Image = compressedDataUrl.split(",")[1];
-          imageMimeType = "image/jpeg";
-
-          const sizeKB = Math.round((base64Image.length * 3) / 4 / 1024);
-          document.getElementById("imageSizeInfo").innerText = `⚡ تم ضغط الصورة تلقائياً إلى (${sizeKB} KB) لسرعة الفحص`;
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function fetchAvailableGeminiModels(apiKey) {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error?.message || "فشل التحقق من مفتاح Gemini.");
-
-      const validModels = (data.models || [])
-        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
-        .map(m => m.name.replace("models/", ""))
-        .filter(name => name.includes("gemini") && !name.includes("embedding") && !name.includes("aqa"));
-
-      validModels.sort((a, b) => {
-        const score = (n) => n.includes("lite") ? 1 : (n.includes("flash") ? 2 : 3);
-        return score(a) - score(b);
-      });
-
-      return validModels;
-    }
-
-    async function callGeminiDirect(modelName, apiKey, parts) {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { 
-            responseMimeType: "application/json",
-            temperature: 0.2
-          }
-        })
-      });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || "خطأ في الاتصال بالنموذج");
-      }
-
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      return JSON.parse(rawText);
-    }
-
-    async function callOpenRouter(promptText, imgBase64 = "", imgMime = "") {
-      const orKey = (localStorage.getItem("openrouter_api_key") || "").trim();
-      if (!orKey) throw new Error("لا يوجد مفتاح OpenRouter احتياطي.");
-
-      const loadingEl = document.getElementById("loadingMsg");
-      let lastOrError = null;
-
-      const userContent = imgBase64
-        ? [
-            { type: "text", text: promptText },
-            { type: "image_url", image_url: { url: `data:${imgMime};base64,${imgBase64}` } }
-          ]
-        : promptText;
-
-      for (const model of OPENROUTER_MODELS) {
-        loadingEl.innerText = `⚡ التحويل السريع إلى (${model.split("/").pop()})...`;
-        try {
-          const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${orKey}`,
-              "Content-Type": "application/json",
-              "HTTP-Referer": window.location.href,
-              "X-Title": "BuyCheck Al-Uraiby"
-            },
-            body: JSON.stringify({
-              model: model,
-              messages: [{ role: "user", content: userContent }]
-            })
-          });
-
-          const data = await response.json();
-          if (!response.ok) {
-            lastOrError = new Error(data.error?.message || "خطأ");
-            continue;
-          }
-
-          let rawText = data.choices?.[0]?.message?.content || "[]";
-          rawText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
-
-          showBadge("OR: " + model.split("/").pop());
-          return JSON.parse(rawText);
-        } catch (err) {
-          lastOrError = err;
-        }
-      }
-      throw lastOrError || new Error("تعذر الاتصال بـ OpenRouter.");
-    }
-
-    async function runAnalysis(promptText, imgBase64 = "", imgMime = "") {
-      const geminiKey = (localStorage.getItem("gemini_api_key") || "").trim();
-      const orKey = (localStorage.getItem("openrouter_api_key") || "").trim();
-
-      if (!geminiKey && !orKey) {
-        document.getElementById("settingsBox").classList.remove("hidden");
-        throw new Error("يرجى إدخال مفتاح Gemini أو OpenRouter أولاً.");
-      }
-
-      const loadingEl = document.getElementById("loadingMsg");
-      const startTime = performance.now();
-      let lastError = null;
-
-      if (geminiKey) {
-        const parts = imgBase64
-          ? [{ text: promptText }, { inlineData: { mimeType: imgMime, data: imgBase64 } }]
-          : [{ text: promptText }];
-
-        const cachedModel = localStorage.getItem("cached_fast_gemini_model");
-        if (cachedModel) {
-          try {
-            loadingEl.innerText = `⚡ تحليل فوري عبر (${cachedModel})...`;
-            const result = await callGeminiDirect(cachedModel, geminiKey, parts);
-            const sec = ((performance.now() - startTime) / 1000).toFixed(1);
-            showBadge(`${cachedModel} • ${sec}s`);
-            return result;
-          } catch (err) {
-            localStorage.removeItem("cached_fast_gemini_model");
-            lastError = err;
-          }
-        }
-
-        try {
-          const models = await fetchAvailableGeminiModels(geminiKey);
-          for (const modelName of models) {
-            loadingEl.innerText = `⚡ جاري التحليل عبر (${modelName})...`;
-            try {
-              const result = await callGeminiDirect(modelName, geminiKey, parts);
-              localStorage.setItem("cached_fast_gemini_model", modelName);
-              const sec = ((performance.now() - startTime) / 1000).toFixed(1);
-              showBadge(`${modelName} • ${sec}s`);
-              return result;
-            } catch (err) {
-              lastError = err;
-            }
-          }
-        } catch (err) {
-          lastError = err;
-        }
-      }
-
-      if (orKey) {
-        return await callOpenRouter(promptText, imgBase64, imgMime);
-      }
-
-      throw lastError || new Error("تعذر إتمام التحليل.");
-    }
-
-    function showBadge(text) {
-      const badge = document.getElementById("usedModelBadge");
-      badge.innerText = text;
-      badge.classList.remove("hidden");
-    }
-
-    function getPrompt(extraNote = "") {
-      return `أنت خبير تسعير ومشتريات مواد منزلية وهدايا وديكور في السوق العراقي (الموصل وبغداد).
-المستخدم تاجر جملة ومفرد (مكتب أثير العريبي لتجارة المواد المنزلية) يشتري من الموردين ويبيع لأصحاب المحلات (جملة) وللمستهلك (مفرد).
-حلل المنتجات والأسعار الموجودة في المدخلات التالية. ${extraNote ? "ملاحظة المستخدم: " + extraNote : ""}
-أرجع النتيجة حصرياً بصيغة JSON Array من الكائنات، بحيث يحتوي كل كائن على الحقول السبعة التالية فقط:
-[
-  {
-    "name": "اسم المنتج والمواصفات باختصار",
-    "current_supplier_price": "سعر المورد الحالي المعروض",
-    "good_supplier_price": "سعر الشراء الجيد والمستهدف من الموردين",
-    "market_wholesale_price": "سعر الجملة السائد في السوق العراقي",
-    "our_suggested_wholesale": "سعر الجملة المقترح لنا للبيع (يضمن لنا ربحاً جيداً ويبقى منافساً وجذاباً لأصحاب المحلات دون أن يكون غالياً)",
-    "market_retail_price": "سعر المفرد المتعارف عليه في السوق العراقي",
-    "worth_buying": "✅ يستحق الشراء (فرصة ربح ممتازة)" أو "⚖️ مقبول (ربح اعتيادي)" أو "❌ لا يستحق (سعر المورد مرتفع)"
-  }
-]`;
-    }
-
-    function renderTable(items) {
-      const tbody = document.getElementById("resultTableBody");
-      tbody.innerHTML = "";
-      if (!items || items.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-3 text-center text-gray-500">لم يتم العثور على منتجات واضحة.</td></tr>`;
-      } else {
-        items.forEach(item => {
-          tbody.innerHTML += `
-            <tr class="hover:bg-gray-50">
-              <td class="p-2.5 font-bold text-gray-800">${item.name || "-"}</td>
-              <td class="p-2.5 text-teal-700 font-bold">${item.current_supplier_price || "-"}</td>
-              <td class="p-2.5 text-emerald-700 font-semibold">${item.good_supplier_price || "-"}</td>
-              <td class="p-2.5 text-blue-700 font-semibold">${item.market_wholesale_price || "-"}</td>
-              <td class="p-2.5 bg-teal-50/50 text-teal-900 font-extrabold">${item.our_suggested_wholesale || "-"}</td>
-              <td class="p-2.5 text-gray-700 font-semibold">${item.market_retail_price || "-"}</td>
-              <td class="p-2.5 font-bold">${item.worth_buying || "-"}</td>
-            </tr>
-          `;
-        });
-      }
-      document.getElementById("tableContainer").classList.remove("hidden");
-    }
-
-    async function analyzeImage() {
-      if (!base64Image) return alert("يرجى اختيار صورة أولاً.");
-      const note = document.getElementById("imageNote").value.trim();
-      const btn = document.getElementById("btnAnalyzeImage");
-      
-      prepareUI(btn, true);
-      try {
-        const items = await runAnalysis(getPrompt(note), base64Image, imageMimeType);
-        renderTable(items);
-      } catch (err) {
-        showError(err.message);
-      } finally {
-        prepareUI(btn, false, "⚡ استخرج وحلل الجدول الكامل");
-      }
-    }
-
-    async function analyzeText() {
-      const text = document.getElementById("textInput").value.trim();
-      if (!text) return alert("يرجى إدخال نص القائمة أولاً.");
-      const btn = document.getElementById("btnAnalyzeText");
-
-      prepareUI(btn, true);
-      try {
-        const prompt = getPrompt() + "\n\nالنص:\n" + text;
-        const items = await runAnalysis(prompt);
-        renderTable(items);
-      } catch (err) {
-        showError(err.message);
-      } finally {
-        prepareUI(btn, false, "⚡ حلل القائمة والجدول الكامل");
-      }
-    }
-
-    function prepareUI(btn, isLoading, defaultText = "") {
-      document.getElementById("resultBox").classList.remove("hidden");
-      document.getElementById("loadingMsg").classList.toggle("hidden", !isLoading);
-      if (isLoading) {
-        document.getElementById("errorMsg").classList.add("hidden");
-        document.getElementById("tableContainer").classList.add("hidden");
-        document.getElementById("usedModelBadge").classList.add("hidden");
-        btn.disabled = true;
-        btn.innerText = "⚡ جاري التحليل...";
-      } else {
-        btn.disabled = false;
-        btn.innerText = defaultText;
-      }
-    }
-
-    function showError(msg) {
-      const errBox = document.getElementById("errorMsg");
-      errBox.innerText = "❌ " + msg;
-      errBox.classList.remove("hidden");
-    }
-  </script>
-</body>
-</html>
+      document.getElementById
