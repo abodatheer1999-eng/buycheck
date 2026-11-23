@@ -86,7 +86,11 @@
 
     <!-- صندوق النتائج -->
     <div id="resultBox" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3 border-t-4 brand-border">
-      <h2 class="font-extrabold text-base brand-text">نتيجة التحليل وتوصية الشراء:</h2>
+      <div class="flex justify-between items-center">
+        <h2 class="font-extrabold text-base brand-text">نتيجة التحليل وتوصية الشراء:</h2>
+        <span id="usedModelBadge" class="hidden text-[10px] bg-teal-50 text-teal-700 px-2 py-0.5 rounded-full font-bold" dir="ltr"></span>
+      </div>
+      
       <div id="loadingMsg" class="hidden text-center py-4 text-sm font-bold text-teal-700">
         ⏳ جاري تحليل البيانات والأسعار...
       </div>
@@ -110,7 +114,13 @@
   </main>
 
   <script>
-    const MODEL_NAME = "gemini-3.8-flash";
+    // قائمة النماذج مرتبة حسب الأولوية للانتقال التلقائي عند الضغط
+    const FALLBACK_MODELS = [
+      "gemini-3.8-flash",
+      "gemini-3.8-flash-lite",
+      "gemini-3.8-pro"
+    ];
+
     let base64Image = "";
     let imageMimeType = "";
 
@@ -168,23 +178,61 @@
         throw new Error("يرجى إدخال وحفظ مفتاح Gemini API Key أولاً.");
       }
 
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{ parts }],
-          generationConfig: { responseMimeType: "application/json" }
-        })
-      });
+      let lastError = null;
+      const loadingEl = document.getElementById("loadingMsg");
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.error?.message || "حدث خطأ أثناء الاتصال بالخادم.");
+      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+        const modelName = FALLBACK_MODELS[i];
+        
+        if (i > 0) {
+          loadingEl.innerText = `⏳ النموذج الأساسي مشغول، جاري التحويل تلقائياً إلى (${modelName})...`;
+        } else {
+          loadingEl.innerText = "⏳ جاري تحليل البيانات والأسعار...";
+        }
+
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
+        
+        try {
+          const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts }],
+              generationConfig: { responseMimeType: "application/json" }
+            })
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            const msg = data.error?.message || "خطأ غير معروف";
+            // إذا كان الخطأ بسبب الضغط أو عدم توفر النموذج مؤقتاً، جرب النموذج التالي
+            if (response.status === 503 || response.status === 429 || response.status === 404 || msg.toLowerCase().includes("demand") || msg.toLowerCase().includes("overloaded")) {
+              lastError = new Error(msg);
+              continue;
+            }
+            // إذا كان الخطأ في المفتاح نفسه (مثل 400 أو 403) توقف فوراً وأظهر الخطأ
+            throw new Error(msg);
+          }
+
+          // نجح الاتصال: اعرض اسم النموذج المستخدم في زاوية النتيجة
+          const badge = document.getElementById("usedModelBadge");
+          badge.innerText = modelName;
+          badge.classList.remove("hidden");
+
+          const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+          return JSON.parse(rawText);
+
+        } catch (err) {
+          lastError = err;
+          // إذا كان خطأ شبكة أو مفتاح غير صالح، لا داعي لتكرار المحاولة
+          if (err.message.includes("API key") || err.message.includes("Failed to fetch")) {
+            throw err;
+          }
+        }
       }
 
-      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-      return JSON.parse(rawText);
+      throw lastError || new Error("جميع النماذج مشغولة حالياً، يرجى المحاولة بعد دقيقة.");
     }
 
     function getPrompt(extraNote = "") {
@@ -263,20 +311,3 @@
       document.getElementById("loadingMsg").classList.toggle("hidden", !isLoading);
       if (isLoading) {
         document.getElementById("errorMsg").classList.add("hidden");
-        document.getElementById("tableContainer").classList.add("hidden");
-        btn.disabled = true;
-        btn.innerText = "⏳ جاري التحليل...";
-      } else {
-        btn.disabled = false;
-        btn.innerText = defaultText;
-      }
-    }
-
-    function showError(msg) {
-      const errBox = document.getElementById("errorMsg");
-      errBox.innerText = "❌ خطأ: " + msg + " (تأكد من صحة المفتاح أو اتصال الإنترنت).";
-      errBox.classList.remove("hidden");
-    }
-  </script>
-</body>
-</html>
