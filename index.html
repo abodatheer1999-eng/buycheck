@@ -27,7 +27,6 @@
 </head>
 <body class="pb-12">
 
-  <!-- الشريط العلوي -->
   <header class="brand-bg text-white p-4 shadow-md sticky top-0 z-10">
     <div class="max-w-xl mx-auto flex justify-between items-center">
       <div>
@@ -42,7 +41,6 @@
 
   <main class="max-w-xl mx-auto p-4 space-y-4">
 
-    <!-- صندوق إدخال المفتاح -->
     <div id="settingsBox" class="hidden bg-white p-4 rounded-xl shadow border border-teal-200">
       <label class="block text-sm font-bold brand-text mb-1">مفتاح Gemini API Key:</label>
       <div class="flex gap-2">
@@ -52,13 +50,11 @@
       <p class="text-xs text-gray-500 mt-1">* يُحفظ في جهازك الشخصي فقط.</p>
     </div>
 
-    <!-- التبويبات -->
     <div class="grid grid-cols-2 gap-2 bg-white p-1.5 rounded-xl shadow-sm">
       <button id="tab-image" onclick="switchTab('image')" class="brand-bg text-white py-2 rounded-lg text-sm font-bold transition">📸 فحص صورة</button>
       <button id="tab-text" onclick="switchTab('text')" class="text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition">📝 نص / قائمة</button>
     </div>
 
-    <!-- قسم فحص الصورة -->
     <div id="section-image" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
       <label class="block text-sm font-bold text-gray-700">التقط صورة أو اختر لقطة شاشة لمنتج أو قائمة:</label>
       <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" class="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 border rounded-lg p-1.5" />
@@ -74,7 +70,6 @@
       </button>
     </div>
 
-    <!-- قسم فحص النص -->
     <div id="section-text" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3">
       <label class="block text-sm font-bold text-gray-700">ألصق قائمة الأسعار أو تفاصيل المنتجات هنا:</label>
       <textarea id="textInput" rows="5" placeholder="مثال:&#10;طقم بهارات 7 قطع بسعر 12,000&#10;ترمس شاي 1 لتر بسعر 9,500" class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:border-teal-600"></textarea>
@@ -84,7 +79,6 @@
       </button>
     </div>
 
-    <!-- صندوق النتائج -->
     <div id="resultBox" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3 border-t-4 brand-border">
       <div class="flex justify-between items-center">
         <h2 class="font-extrabold text-base brand-text">نتيجة التحليل وتوصية الشراء:</h2>
@@ -92,9 +86,9 @@
       </div>
       
       <div id="loadingMsg" class="hidden text-center py-4 text-sm font-bold text-teal-700">
-        ⏳ جاري تحليل البيانات والأسعار...
+        ⏳ جاري البحث عن نموذج فعال وتحليل البيانات...
       </div>
-      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-xs font-bold leading-relaxed"></div>
+      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-xs font-bold leading-relaxed" dir="ltr"></div>
       
       <div id="tableContainer" class="hidden overflow-x-auto">
         <table class="w-full text-right border-collapse text-xs">
@@ -114,13 +108,6 @@
   </main>
 
   <script>
-    // قائمة النماذج مرتبة حسب الأولوية للانتقال التلقائي عند الضغط
-    const FALLBACK_MODELS = [
-      "gemini-3.8-flash",
-      "gemini-3.8-flash-lite",
-      "gemini-3.8-pro"
-    ];
-
     let base64Image = "";
     let imageMimeType = "";
 
@@ -171,6 +158,29 @@
       reader.readAsDataURL(file);
     }
 
+    // جلب قائمة النماذج الفعالة مباشرة من حسابك
+    async function getAvailableModels(apiKey) {
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "فشل التحقق من مفتاح API.");
+      }
+      // تصفية النماذج التي تدعم توليد المحتوى (generateContent)
+      const validModels = (data.models || [])
+        .filter(m => m.supportedGenerationMethods && m.supportedGenerationMethods.includes("generateContent"))
+        .map(m => m.name.replace("models/", ""))
+        .filter(name => name.includes("gemini") && !name.includes("embedding") && !name.includes("aqa"));
+      
+      // ترتيبها لتفضيل نسخ flash الأسرع أولاً
+      validModels.sort((a, b) => {
+        const aFlash = a.includes("flash") ? -1 : 1;
+        const bFlash = b.includes("flash") ? -1 : 1;
+        return aFlash - bFlash;
+      });
+
+      return validModels;
+    }
+
     async function callGemini(parts) {
       const apiKey = (localStorage.getItem("gemini_api_key") || "").trim();
       if (!apiKey) {
@@ -178,17 +188,19 @@
         throw new Error("يرجى إدخال وحفظ مفتاح Gemini API Key أولاً.");
       }
 
-      let lastError = null;
       const loadingEl = document.getElementById("loadingMsg");
+      loadingEl.innerText = "⏳ جاري فحص النماذج المتاحة في حسابك...";
 
-      for (let i = 0; i < FALLBACK_MODELS.length; i++) {
-        const modelName = FALLBACK_MODELS[i];
-        
-        if (i > 0) {
-          loadingEl.innerText = `⏳ النموذج الأساسي مشغول، جاري التحويل تلقائياً إلى (${modelName})...`;
-        } else {
-          loadingEl.innerText = "⏳ جاري تحليل البيانات والأسعار...";
-        }
+      const models = await getAvailableModels(apiKey);
+      if (!models || models.length === 0) {
+        throw new Error("لا توجد نماذج Gemini مفعّلة لهذا المفتاح.");
+      }
+
+      let lastError = null;
+
+      for (let i = 0; i < models.length; i++) {
+        const modelName = models[i];
+        loadingEl.innerText = `⏳ جاري التحليل عبر (${modelName})...`;
 
         const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`;
         
@@ -205,17 +217,10 @@
           const data = await response.json();
 
           if (!response.ok) {
-            const msg = data.error?.message || "خطأ غير معروف";
-            // إذا كان الخطأ بسبب الضغط أو عدم توفر النموذج مؤقتاً، جرب النموذج التالي
-            if (response.status === 503 || response.status === 429 || response.status === 404 || msg.toLowerCase().includes("demand") || msg.toLowerCase().includes("overloaded")) {
-              lastError = new Error(msg);
-              continue;
-            }
-            // إذا كان الخطأ في المفتاح نفسه (مثل 400 أو 403) توقف فوراً وأظهر الخطأ
-            throw new Error(msg);
+            lastError = new Error(`[${modelName}]: ${data.error?.message || "خطأ غير معروف"}`);
+            continue;
           }
 
-          // نجح الاتصال: اعرض اسم النموذج المستخدم في زاوية النتيجة
           const badge = document.getElementById("usedModelBadge");
           badge.innerText = modelName;
           badge.classList.remove("hidden");
@@ -225,14 +230,10 @@
 
         } catch (err) {
           lastError = err;
-          // إذا كان خطأ شبكة أو مفتاح غير صالح، لا داعي لتكرار المحاولة
-          if (err.message.includes("API key") || err.message.includes("Failed to fetch")) {
-            throw err;
-          }
         }
       }
 
-      throw lastError || new Error("جميع النماذج مشغولة حالياً، يرجى المحاولة بعد دقيقة.");
+      throw lastError || new Error("تعذر إتمام الطلب على جميع النماذج المتاحة.");
     }
 
     function getPrompt(extraNote = "") {
@@ -311,3 +312,21 @@
       document.getElementById("loadingMsg").classList.toggle("hidden", !isLoading);
       if (isLoading) {
         document.getElementById("errorMsg").classList.add("hidden");
+        document.getElementById("tableContainer").classList.add("hidden");
+        document.getElementById("usedModelBadge").classList.add("hidden");
+        btn.disabled = true;
+        btn.innerText = "⏳ جاري التحليل...";
+      } else {
+        btn.disabled = false;
+        btn.innerText = defaultText;
+      }
+    }
+
+    function showError(msg) {
+      const errBox = document.getElementById("errorMsg");
+      errBox.innerText = "❌ " + msg;
+      errBox.classList.remove("hidden");
+    }
+  </script>
+</body>
+</html>
