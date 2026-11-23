@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>مفكرة الشراء الخاصة - أبو فيروزة</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Cairo', sans-serif; background-color: #f4f7f8; }
+.brand-bg { background-color: #008080; }
+.brand-text { color: #008080; }
+</style>
+</head>
+<body class="text-gray-800 pb-12">
+
+<!-- الشريط العلوي -->
+<header class="brand-bg text-white p-4 shadow-md sticky top-0 z-10">
+<div class="max-w-xl mx-auto flex justify-between items-center">
+<div>
+<h1 class="text-lg font-extrabold">مفكرة الشراء الخاصة</h1>
+<p class="text-xs text-teal-100">فحص سريع بالصورة أو النص قبل الشراء</p>
+</div>
+<button onclick="toggleSettings()" class="bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg text-sm font-bold">
+⚙️ المفتاح
+</button>
+</div>
+</header>
+
+<main class="max-w-xl mx-auto p-4 space-y-4">
+
+<!-- إعدادات API Key -->
+<div id="settingsBox" class="hidden bg-white p-4 rounded-xl shadow border border-teal-200">
+<label class="block text-sm font-bold mb-1">مفتاح Gemini API Key:</label>
+<div class="flex gap-2">
+<input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full border rounded-lg p-2 text-left text-sm" dir="ltr">
+<button onclick="saveKey()" class="brand-bg text-white px-4 py-2 rounded-lg text-sm font-bold">حفظ</button>
+</div>
+<p class="text-xs text-gray-500 mt-1">محفوظ في جهازك الشخصي فقط.</p>
+</div>
+
+<!-- أزرار التبويب -->
+<div class="grid grid-cols-3 gap-2 bg-white p-1.5 rounded-xl shadow-sm">
+<button onclick="switchTab('image')" id="tab-image" class="tab-btn brand-bg text-white py-2 rounded-lg text-sm font-bold">📸 فحص صورة</button>
+<button onclick="switchTab('text')" id="tab-text" class="tab-btn text-gray-600 py-2 rounded-lg text-sm font-bold">✍️ نص / قائمة</button>
+<button onclick="switchTab('history')" id="tab-history" class="tab-btn text-gray-600 py-2 rounded-lg text-sm font-bold">السجل (<span id="countBadge">0</span>)</button>
+</div>
+
+<!-- 1. تبويب فحص صورة (عدة منتجات بصورة واحدة) -->
+<section id="view-image" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+<div>
+<label class="block text-sm font-bold mb-2">التقط صورة أو اختر لقطة شاشة (تحتوي منتج أو عدة منتجات)</label>
+<input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" class="w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 border rounded-lg p-1.5">
+</div>
+
+<!-- معاينة الصورة -->
+<div id="imagePreviewBox" class="hidden">
+<img id="imagePreview" class="max-h-56 mx-auto rounded-lg border shadow-sm object-contain" />
+</div>
+
+<div>
+<label class="block text-xs font-bold text-gray-600 mb-1">ملاحظة إضافية (اختياري - مثلاً: الأسعار بالصورة بالدولار أو بالدينار)</label>
+<input type="text" id="imageNote" placeholder="مثال: هذه أسعار جملة من المورد بالصين أو بغداد..." class="w-full border rounded-lg p-2 text-sm focus:outline-none focus:border-teal-600">
+</div>
+
+<button onclick="analyzeImage()" id="btnImage" class="w-full brand-bg hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow transition">
+🔍 استخرج وحلل كل المنتجات بالصورة
+</button>
+
+<!-- نتائج تحليل الصورة -->
+<div id="imageResult" class="hidden overflow-x-auto mt-4">
+<table class="w-full text-sm text-right border-collapse">
+<thead>
+<tr class="bg-teal-50 text-teal-900 border-b">
+<th class="p-2">المنتج المكتشف</th>
+<th class="p-2">أقل سعر بيع</th>
+<th class="p-2">السرعة</th>
+<th class="p-2">القرار</th>
+</tr>
+</thead>
+<tbody id="imageTableBody" class="divide-y"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 2. تبويب فحص نص أو قائمة -->
+<section id="view-text" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3">
+<div>
+<label class="block text-sm font-bold mb-1">اكتب اسم منتج أو الصق قائمة منتجات مع أسعارها</label>
+<textarea id="bulkList" rows="5" placeholder="مثال:
+مبخرة كهربائية محمولة - 7000
+منظم بهارات دوار 16 علبة - 14000
+سيت فناجين قهوة بورسلين - 15000" class="w-full border rounded-lg p-2.5 text-sm focus:outline-none focus:border-teal-600"></textarea>
+</div>
+<button onclick="analyzeText()" id="btnText" class="w-full brand-bg hover:bg-teal-700 text-white font-bold py-3 rounded-xl shadow transition">
+📋 افحص الآن
+</button>
+
+<div id="textResult" class="hidden overflow-x-auto mt-4">
+<table class="w-full text-sm text-right border-collapse">
+<thead>
+<tr class="bg-teal-50 text-teal-900 border-b">
+<th class="p-2">المنتج</th>
+<th class="p-2">أقل سعر بيع</th>
+<th class="p-2">السرعة</th>
+<th class="p-2">القرار</th>
+</tr>
+</thead>
+<tbody id="textTableBody" class="divide-y"></tbody>
+</table>
+</div>
+</section>
+
+<!-- 3. تبويب السجل والتصدير -->
+<section id="view-history" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3">
+<div class="flex justify-between items-center">
+<h2 class="font-bold text-sm">سجل قرارات الشراء</h2>
+<div class="flex gap-2">
+<button onclick="exportCSV()" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold">
+📥 تصدير Excel
+</button>
+<button onclick="clearHistory()" class="bg-red-100 text-red-700 px-2.5 py-1.5 rounded-lg text-xs font-bold">مسح</button>
+</div>
+</div>
+<div id="historyList" class="divide-y text-sm"></div>
+</section>
+
+</main>
+
+<script>
+let historyData = JSON.parse(localStorage.getItem('uraiby_private_check') || '[]');
+let selectedBase64 = null;
+let selectedMimeType = null;
+
+document.getElementById('apiKeyInput').value = localStorage.getItem('gemini_api_key') || '';
+updateHistoryUI();
+
+function toggleSettings() {
+document.getElementById('settingsBox').classList.toggle('hidden');
+}
+
+function saveKey() {
+const key = document.getElementById('apiKeyInput').value.trim();
+localStorage.setItem('gemini_api_key', key);
+alert('تم حفظ المفتاح بنجاح');
+toggleSettings();
+}
+
+function switchTab(tab) {
+['image', 'text', 'history'].forEach(t => {
+document.getElementById('view-' + t).classList.add('hidden');
+const btn = document.getElementById('tab-' + t);
+btn.classList.remove('brand-bg', 'text-white');
+btn.classList.add('text-gray-600');
+});
+document.getElementById('view-' + tab).classList.remove('hidden');
+const activeBtn = document.getElementById('tab-' + tab);
+activeBtn.classList.add('brand-bg', 'text-white');
+activeBtn.classList.remove('text-gray-600');
+}
+
+function previewImage(event) {
+const file = event.target.files[0];
+if (!file) return;
+selectedMimeType = file.type;
+const reader = new FileReader();
+reader.onload = function(e) {
+document.getElementById('imagePreview').src = e.target.result;
+document.getElementById('imagePreviewBox').classList.remove('hidden');
+selectedBase64 = e.target.result.split(',')[1];
+};
+reader.readAsDataURL(file);
+}
+
+async function callGemini(partsArray) {
+const apiKey = localStorage.getItem('gemini_api_key');
+if (!apiKey) {
+toggleSettings();
+throw new Error('يرجى إدخال مفتاح Gemini API Key أولاً.');
+}
+
+const res = await fetch(https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+method: 'POST',
+headers: { 'Content-Type': 'application/json' },
+body: JSON.stringify({
+contents: [{ parts: partsArray }],
+generationConfig: { responseMimeType: "application/json" }
+})
+});
+
+const data = await res.json();
+if (data.error) throw new Error(data.error.message);
+return JSON.parse(data.candidates[0].content.parts[0].text);
+}
+
+function renderTable(items, tbodyId, containerId) {
+const tbody = document.getElementById(tbodyId);
+tbody.innerHTML = '';
+items.forEach(item => {
+const isGood = item.decision.includes('يمشي') && !item.decision.includes('ما');
+tbody.innerHTML += &lt;tr class="${isGood ? 'bg-green-50/60' : 'bg-red-50/60'}">
+<td class="p-2 font-bold">
+{item.detected_price ? <span class="block text-xs text-teal-700 font-normal"&gt;المعروض: ${item.detected_price}</span>: ''} &lt;div class="text-xs text-gray-500 font-normal mt-0.5"&gt;${item.note}</div>
+</td>
+<td class="p-2 font-bold text-teal-800">{item.speed}</td>
+<td class="p-2 font-extrabold {item.decision}</td>
+</tr>
+`;
+saveToHistory({
+date: new Date().toLocaleDateString('ar-IQ'),
+name: item.name,
+cost: item.detected_price || '-',
+min_price: item.min_price,
+speed: item.speed,
+decision: item.decision
+});
+});
+document.getElementById(containerId).classList.remove('hidden');
+}
+
+async function analyzeImage() {
+if (!selectedBase64) return alert('اختر صورة أو التقطها أولاً');
+
+const note = document.getElementById('imageNote').value.trim();
+const btn = document.getElementById('btnImage');
+const resDiv = document.getElementById('imageResult');
+btn.disabled = true;
+btn.innerText = '⏳ جاري قراءة الصورة وتحليل المنتجات...';
+resDiv.classList.add('hidden');
+
+try {
+const prompt = أنت مستشار مشتريات لتاجر مواد منزلية وديكور وهدايا في العراق (الموصل). افحص هذه الصورة بدقة، واستخرج كل المنتجات الظاهرة فيها (سواء كانت منتجاً واحداً أو مجموعة منتجات في كتالوج أو رف). ${note ? 'ملاحظة من المشتري: ' + note : ''}
+لكل منتج تكتشفه، اقرأ سعره إذا كان مكتوباً في الصورة، وقدّر أقل سعر بيع متداول له في السوق العراقي بالدينار، وسرعة دورانه، وهل تنصح بشرائه أم لا.
+
+أرجع مصفوفة JSON فقط (Array) بهذا الشكل:
+[
+{
+"name": "اسم المنتج ووصفه المختصر",
+"detected_price": "السعر المكتوب بالصورة إن وجد أو فارغ",
+"min_price": "أقل سعر بيع متداول بالسوق بالدينار العراقي",
+"speed": "سريع" أو "متوسط" أو "بطيء",
+"decision": "يمشي ✅" أو "ما يمشي ❌",
+"note": "سبب مختصر جداً لقرار الشراء"
+}
+]`;
+
+const items = await callGemini([
+{ text: prompt },
+{ inlineData: { mimeType: selectedMimeType, data: selectedBase64 } }
+ ]);
+renderTable(items, 'imageTableBody', 'imageResult');
+} catch (err) {
+alert('خطأ: ' + err.message);
+} finally {
+btn.disabled = false;
+btn.innerText = '🔍 استخرج وحلل كل المنتجات بالصورة';
+}
+}
+
+async function analyzeText() {
+const listText = document.getElementById('bulkList').value.trim();
+if (!listText) return alert('اكتب اسم المنتج أو القائمة أولاً');
+
+const btn = document.getElementById('btnText');
+const resDiv = document.getElementById('textResult');
+btn.disabled = true;
+btn.innerText = '⏳ جاري الفحص...';
+resDiv.classList.add('hidden');
+
+try {
+const prompt = أنت مستشار مشتريات لتاجر مواد منزلية وديكور وهدايا في العراق (الموصل). قيم هذه المنتجات:${listText}
+
+أرجع مصفوفة JSON فقط (Array) بهذا الشكل:
+[
+{
+"name": "اسم المنتج",
+"detected_price": "السعر المذكور إن وجد",
+"min_price": "أقل سعر بيع متداول بالسوق بالدينار العراقي",
+"speed": "سريع" أو "متوسط" أو "بطيء",
+"decision": "يمشي ✅" أو "ما يمشي ❌",
+"note": "سبب مختصر جداً"
+}
+]`;
+
+const items = await callGemini([{ text: prompt }]);
+renderTable(items, 'textTableBody', 'textResult');
+} catch (err) {
+alert('خطأ: ' + err.message);
+} finally {
+btn.disabled = false;
+btn.innerText = '📋 افحص الآن';
+}
+}
+
+function saveToHistory(entry) {
+historyData.unshift(entry);
+localStorage.setItem('uraiby_private_check', JSON.stringify(historyData));
+updateHistoryUI();
+}
+
+function updateHistoryUI() {
+document.getElementById('countBadge').innerText = historyData.length;
+const list = document.getElementById('historyList');
+if (historyData.length === 0) {
+list.innerHTML = '<p class="text-gray-400 text-center py-4">لا توجد فحوصات محفوظة بعد</p>';
+return;
+}
+list.innerHTML = historyData.map(h => &lt;div class="py-2.5 flex justify-between items-center"&gt; &lt;div&gt; &lt;p class="font-bold"&gt;${h.name}</p>
+<p class="text-xs text-gray-500">${h.date} | أقل سعر: ${h.min_price} | ${h.speed}&lt;/p&gt; &lt;/div&gt; &lt;span class="font-bold text-xs px-2 py-1 rounded ${h.decision.includes('ما') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}">${h.decision}&lt;/span&gt; &lt;/div&gt;).join('');
+}
+
+function exportCSV() {
+if (historyData.length === 0) return alert('السجل فارغ');
+let csv = '\uFEFFالتاريخ,المنتج,السعر المعروض,أقل سعر بيع,السرعة,القرار\n';
+historyData.forEach(r => {
+csv += "${r.date}","${r.name}","${r.cost}","${r.min_price}","${r.speed}","${r.decision}"\n;
+});
+const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = مفكرة_الشراء_${new Date().toISOString().slice(0,10)}.csv;
+link.click();
+}
+
+function clearHistory() {
+if (confirm('مسح جميع السجلات؟')) {
+historyData = [];
+localStorage.removeItem('uraiby_private_check');
+updateHistoryUI();
+}
+}
+</script>
+</body>
+</html>
