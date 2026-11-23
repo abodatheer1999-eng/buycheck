@@ -4,215 +4,492 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>مستشار المشتريات الذكي - أبو فيروزة</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #008080;
-      --primary-dark: #006666;
-      --bg: #f4f7f6;
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Tahoma, sans-serif; }
+    body { background-color: #f4f7f6; color: #222; margin: 0; padding: 0 0 60px 0; }
+    header { background-color: #008080; color: #fff; padding: 14px; position: sticky; top: 0; z-index: 20; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .header-inner { max-width: 600px; margin: auto; display: flex; justify-content: space-between; align-items: center; }
+    .header-title { font-size: 16px; font-weight: 800; margin: 0; }
+    .header-sub { font-size: 11px; color: #ccf2f2; margin: 2px 0 0 0; }
+    .btn-top { background: #005f5f; color: #fff; border: none; padding: 7px 11px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .container { max-width: 600px; margin: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+    .card { background: #fff; padding: 14px; border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .hidden { display: none !important; }
+    .label { display: block; font-size: 12px; font-weight: bold; color: #444; margin-bottom: 6px; }
+    input[type="text"], input[type="password"], input[type="number"], textarea {
+      width: 100%; border: 1px solid #ccc; border-radius: 8px; padding: 9px 11px; font-size: 13px; outline: none;
     }
-    body {
-      font-family: 'Cairo', sans-serif;
-      background-color: var(--bg);
-      color: #222222;
-      margin: 0;
-      padding: 0;
-    }
-    .brand-bg { background-color: var(--primary); }
-    .brand-bg:hover { background-color: var(--primary-dark); }
-    .brand-text { color: var(--primary); }
-    .brand-border { border-color: var(--primary); }
+    input:focus, textarea:focus { border-color: #008080; }
+    .tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #fff; padding: 5px; border-radius: 12px; }
+    .tab-btn { border: none; padding: 9px; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; background: transparent; color: #555; }
+    .tab-btn.active { background: #008080; color: #fff; }
+    .chips-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .chip { border: none; padding: 6px 11px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; background: #eef2f1; color: #333; }
+    .chip.selected { background: #008080; color: #fff; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-cam { background: #008080; color: #fff; border: none; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-gal { background: #334155; color: #fff; border: none; padding: 11px; border-radius: 10px; font-size: 13px; font-weight: bold; cursor: pointer; width: 100%; }
+    .btn-main { background: #008080; color: #fff; border: none; padding: 13px; border-radius: 12px; font-size: 15px; font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; }
+    .btn-main:disabled { opacity: 0.6; }
+    .res-card { background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); border-right: 7px solid #f59e0b; margin-top: 10px; }
+    .res-green { border-right-color: #10b981; }
+    .res-red { border-right-color: #ef4444; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 800; background: #fef3c7; color: #92400e; }
+    .res-green .badge { background: #d1fae5; color: #065f46; }
+    .res-red .badge { background: #fee2e2; color: #991b1b; }
+    .price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 10px; margin: 10px 0; font-size: 12px; }
+    .error-box { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 10px; font-size: 12px; font-weight: bold; direction: ltr; text-align: left; }
   </style>
 </head>
-<body class="pb-16">
+<body>
 
-  <!-- الشريط العلوي -->
-  <header class="brand-bg text-white p-3.5 shadow-md sticky top-0 z-20">
-    <div class="max-w-xl mx-auto flex justify-between items-center">
+  <header>
+    <div class="header-inner">
       <div>
-        <h1 class="text-base font-extrabold">مستشار المشتريات وبنك الموردين</h1>
-        <p class="text-[11px] text-teal-100">مكتب أثير العريبي • فحص فوري وحماية السيولة</p>
+        <h1 class="header-title">مستشار المشتريات وبنك الموردين</h1>
+        <p class="header-sub">مكتب أثير العريبي • فحص فوري وحماية السيولة</p>
       </div>
-      <div class="flex gap-1.5">
-        <button onclick="toggleArchive()" class="bg-teal-800 hover:bg-teal-900 px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 shadow-sm">
-          📒 الأرشيف (<span id="archiveCount">0</span>)
-        </button>
-        <button onclick="toggleSettings()" class="bg-teal-700 hover:bg-teal-800 px-2.5 py-1.5 rounded-lg text-xs font-bold shadow-sm">
-          ⚙️
-        </button>
+      <div style="display:flex; gap:6px;">
+        <button type="button" id="btnToggleArchive" class="btn-top">📒 الأرشيف (<span id="archiveCount">0</span>)</button>
+        <button type="button" id="btnToggleSettings" class="btn-top">⚙️ المفاتيح</button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-xl mx-auto p-3.5 space-y-3.5">
+  <div class="container">
 
-    <!-- صندوق إدخال المفاتيح -->
-    <div id="settingsBox" class="hidden bg-white p-4 rounded-xl shadow border border-teal-200 space-y-3">
-      <div>
-        <label class="block text-xs font-bold brand-text mb-1">1. مفتاح Gemini API Key (الأساسي):</label>
-        <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full border rounded-lg px-3 py-2 text-xs text-left focus:outline-none focus:border-teal-600" dir="ltr" />
-      </div>
-      <div>
-        <label class="block text-xs font-bold text-gray-700 mb-1">2. مفتاح OpenRouter API Key (احتياطي):</label>
-        <input type="password" id="openRouterKeyInput" placeholder="sk-or-..." class="w-full border rounded-lg px-3 py-2 text-xs text-left focus:outline-none focus:border-teal-600" dir="ltr" />
-      </div>
-      <div class="flex justify-end">
-        <button onclick="saveKeys()" class="brand-bg text-white px-4 py-1.5 rounded-lg text-xs font-bold">حفظ المفاتيح</button>
-      </div>
+    <!-- صندوق المفاتيح -->
+    <div id="settingsBox" class="card hidden">
+      <label class="label">1. مفتاح Gemini API Key (الأساسي):</label>
+      <input type="password" id="apiKeyInput" placeholder="AIzaSy..." dir="ltr" style="margin-bottom:10px;" />
+      <label class="label">2. مفتاح OpenRouter API Key (احتياطي):</label>
+      <input type="password" id="openRouterKeyInput" placeholder="sk-or-..." dir="ltr" style="margin-bottom:10px;" />
+      <button type="button" id="btnSaveKeys" class="btn-cam">حفظ المفاتيح</button>
     </div>
 
-    <!-- صندوق بنك أسعار الموردين (شركة الهدى وغيرها) -->
-    <div id="archiveBox" class="hidden bg-white p-4 rounded-xl shadow border border-amber-200 space-y-3">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h2 class="text-sm font-extrabold text-amber-800">📒 بنك أسعار الموردين المحفوظة</h2>
-        <button onclick="clearArchive()" class="text-[11px] text-red-600 font-bold underline">مسح الكل</button>
+    <!-- صندوق الأرشيف -->
+    <div id="archiveBox" class="card hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <strong style="font-size:14px; color:#92400e;">📒 بنك أسعار الموردين المحفوظة</strong>
+        <button type="button" id="btnClearArchive" style="background:none; border:none; color:#dc2626; font-size:12px; font-weight:bold; cursor:pointer;">مسح الكل</button>
       </div>
-      <input type="text" id="archiveSearch" oninput="renderArchiveList()" placeholder="ابحث باسم الصنف أو اسم المورد (مثلاً: الهدى)..." class="w-full border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-amber-500" />
-      <div id="archiveList" class="max-h-64 overflow-y-auto divide-y text-xs"></div>
+      <input type="text" id="archiveSearch" placeholder="ابحث باسم الصنف أو المورد (مثلاً: الهدى)..." style="margin-bottom:8px;" />
+      <div id="archiveList" style="max-height:220px; overflow-y:auto; font-size:12px;"></div>
     </div>
 
     <!-- التبويبات -->
-    <div class="grid grid-cols-2 gap-2 bg-white p-1 rounded-xl shadow-sm">
-      <button id="tab-image" onclick="switchTab('image')" class="brand-bg text-white py-2 rounded-lg text-xs font-bold transition">📸 تصوير عند المورد</button>
-      <button id="tab-text" onclick="switchTab('text')" class="text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-xs font-bold transition">📝 كتابة / لصق سعر</button>
+    <div class="tabs">
+      <button type="button" id="tabImage" class="tab-btn active">📸 فحص صورة</button>
+      <button type="button" id="tabText" class="tab-btn">📝 كتابة / لصق سعر</button>
     </div>
 
-    <!-- أزرار الاختيار السريع للمنشأ والحجم والمورد -->
-    <div class="bg-white p-3 rounded-xl shadow-sm space-y-2.5">
-      <div>
-        <span class="block text-[11px] font-bold text-gray-500 mb-1">المنشأ:</span>
-        <div class="flex flex-wrap gap-1.5">
-          <button type="button" onclick="selectChip('origin', 'تلقائي', this)" class="chip-origin bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">تلقائي</button>
-          <button type="button" onclick="selectChip('origin', 'صيني', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇨🇳 صيني</button>
-          <button type="button" onclick="selectChip('origin', 'إيراني', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇮🇷 إيراني</button>
-          <button type="button" onclick="selectChip('origin', 'تركي', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇹🇷 تركي</button>
-          <button type="button" onclick="selectChip('origin', 'عراقي', this)" class="chip-origin bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🇮🇶 عراقي</button>
-        </div>
+    <!-- اختيارات المنشأ والحجم -->
+    <div class="card">
+      <span class="label">المنشأ:</span>
+      <div class="chips-row" id="originGroup">
+        <button type="button" class="chip selected" data-val="تلقائي">تلقائي</button>
+        <button type="button" class="chip" data-val="صيني">🇨🇳 صيني</button>
+        <button type="button" class="chip" data-val="إيراني">🇮🇷 إيراني</button>
+        <button type="button" class="chip" data-val="تركي">🇹🇷 تركي</button>
+        <button type="button" class="chip" data-val="عراقي">🇮🇶 عراقي</button>
       </div>
 
-      <div>
-        <span class="block text-[11px] font-bold text-gray-500 mb-1">الحجم / النوع:</span>
-        <div class="flex flex-wrap gap-1.5">
-          <button type="button" onclick="selectChip('size', 'تلقائي', this)" class="chip-size bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold">تلقائي</button>
-          <button type="button" onclick="selectChip('size', 'صغير', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">صغير</button>
-          <button type="button" onclick="selectChip('size', 'وسط', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">وسط</button>
-          <button type="button" onclick="selectChip('size', 'كبير', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">كبير</button>
-          <button type="button" onclick="selectChip('size', 'سيت كامل', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">سيت كامل</button>
-          <button type="button" onclick="selectChip('size', 'زجاج/قابل للكسر', this)" class="chip-size bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold">🍷 قابل للكسر</button>
-        </div>
+      <span class="label">الحجم / النوع:</span>
+      <div class="chips-row" id="sizeGroup">
+        <button type="button" class="chip selected" data-val="تلقائي">تلقائي</button>
+        <button type="button" class="chip" data-val="صغير">صغير</button>
+        <button type="button" class="chip" data-val="وسط">وسط</button>
+        <button type="button" class="chip" data-val="كبير">كبير</button>
+        <button type="button" class="chip" data-val="سيت كامل">سيت كامل</button>
+        <button type="button" class="chip" data-val="قابل للكسر">🍷 قابل للكسر</button>
       </div>
 
-      <!-- بيانات المخزن المصغرة (لمحاكاة الربط مع نظام العريبي) -->
-      <div class="grid grid-cols-2 gap-2 pt-1 border-t">
+      <div class="grid-2" style="border-top:1px solid #eee; padding-top:10px;">
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 mb-0.5">اسم المورد الحالي:</label>
-          <input type="text" id="supplierNameInput" placeholder="مثلاً: شركة الهدى" class="w-full border rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-teal-600 bg-gray-50" />
+          <span class="label" style="font-size:11px;">اسم المورد الحالي:</span>
+          <input type="text" id="supplierNameInput" placeholder="مثلاً: شركة الهدى" />
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 mb-0.5">رصيدك الحالي بالمحل (اختياري):</label>
-          <input type="number" id="currentStockInput" placeholder="0" class="w-full border rounded-lg px-2.5 py-1.5 text-xs focus:outline-none focus:border-teal-600 bg-gray-50" />
+          <span class="label" style="font-size:11px;">رصيدك بالمحل:</span>
+          <input type="number" id="currentStockInput" placeholder="0" />
         </div>
       </div>
     </div>
 
-    <!-- قسم فحص الصورة -->
-    <div id="section-image" class="bg-white p-3.5 rounded-xl shadow-sm space-y-3">
-      <input type="file" id="imageInput" accept="image/*" capture="environment" onchange="previewAndCompressImage(event)" class="block w-full text-xs text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-teal-600 file:text-white hover:file:bg-teal-700 border rounded-lg p-1.5" />
-      
-      <div id="imagePreviewContainer" class="hidden text-center">
-        <img id="imagePreview" class="max-h-48 mx-auto rounded-lg border shadow-sm object-contain" />
-        <p id="imageSizeInfo" class="text-[10px] text-teal-700 font-bold mt-1"></p>
+    <!-- قسم الصورة -->
+    <div id="sectionImage" class="card">
+      <div class="grid-2" style="margin-bottom:10px;">
+        <button type="button" id="btnOpenCamera" class="btn-cam">📷 التقط بالكاميرا</button>
+        <button type="button" id="btnOpenGallery" class="btn-gal">🖼️ اختر من الاستوديو</button>
+      </div>
+      <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" />
+      <input type="file" id="galleryInput" accept="image/*" class="hidden" />
+
+      <div id="imagePreviewBox" class="hidden" style="text-align:center; margin-bottom:10px;">
+        <img id="imagePreview" style="max-height:180px; max-width:100%; border-radius:10px; border:1px solid #ddd;" />
+        <div id="imageSizeInfo" style="font-size:11px; color:#008080; font-weight:bold; margin-top:4px;"></div>
       </div>
 
-      <input type="text" id="imageNote" placeholder="سعر المورد أو ملاحظة (مثلاً: بـ 3500 أو كرتون 24 قطعة)" class="w-full border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-teal-600" />
-      
-      <button id="btnAnalyzeImage" onclick="analyzeImage()" class="w-full brand-bg text-white py-3 rounded-xl font-extrabold text-sm shadow-md">
-        ⚡ افحص القرار والكمية الذهبية
-      </button>
+      <input type="text" id="imageNote" placeholder="سعر المورد أو ملاحظة (مثلاً: بـ 3500 أو كرتون 24)" />
+      <button type="button" id="btnAnalyzeImage" class="btn-main">⚡ افحص القرار والكمية الذهبية</button>
     </div>
 
-    <!-- قسم فحص النص -->
-    <div id="section-text" class="hidden bg-white p-3.5 rounded-xl shadow-sm space-y-3">
-      <textarea id="textInput" rows="3" placeholder="اكتب اسم المنتج وسعر المورد هنا...&#10;مثال: ترمس شاي إيراني 1 لتر سعر المورد 8500" class="w-full border rounded-lg p-2.5 text-xs focus:outline-none focus:border-teal-600"></textarea>
-      
-      <button id="btnAnalyzeText" onclick="analyzeText()" class="w-full brand-bg text-white py-3 rounded-xl font-extrabold text-sm shadow-md">
-        ⚡ افحص القرار والكمية الذهبية
-      </button>
+    <!-- قسم النص -->
+    <div id="sectionText" class="card hidden">
+      <textarea id="textInput" rows="3" placeholder="اكتب اسم المنتج وسعر المورد هنا...&#10;مثال: ترمس شاي إيراني 1 لتر سعر المورد 8500"></textarea>
+      <button type="button" id="btnAnalyzeText" class="btn-main">⚡ افحص القرار والكمية الذهبية</button>
     </div>
 
-    <!-- صندوق بطاقات القرار السريعة -->
-    <div id="resultBox" class="hidden space-y-3">
-      <div class="flex justify-between items-center px-1">
-        <span class="text-xs font-extrabold brand-text">نتيجة التحليل الاقتصادي والميداني:</span>
-        <span id="usedModelBadge" class="hidden text-[10px] bg-teal-100 text-teal-800 px-2 py-0.5 rounded-full font-bold" dir="ltr"></span>
+    <!-- النتائج -->
+    <div id="resultBox" class="hidden">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <strong style="font-size:13px; color:#008080;">نتيجة الفحص:</strong>
+        <span id="usedModelBadge" class="hidden" style="font-size:11px; background:#d1fae5; color:#065f46; padding:2px 8px; border-radius:12px; font-weight:bold;" dir="ltr"></span>
       </div>
-
-      <div id="loadingMsg" class="hidden bg-white p-6 rounded-xl shadow-sm text-center text-sm font-bold text-teal-700">
-        ⚡ جاري حساب السعر الصافي، الموسم، والكمية المثالية...
-      </div>
-
-      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-xl text-xs font-bold border border-red-200" dir="ltr"></div>
-
-      <!-- حاوية البطاقات الذكية -->
-      <div id="cardsContainer" class="space-y-3"></div>
+      <div id="loadingMsg" class="card hidden" style="text-align:center; font-weight:bold; color:#008080;">⚡ جاري التحليل والمقارنة...</div>
+      <div id="errorMsg" class="error-box hidden"></div>
+      <div id="cardsContainer"></div>
     </div>
 
-  </main>
+  </div>
 
   <script>
-    const OPENROUTER_MODELS = [
-      "google/gemini-2.0-flash-exp:free",
-      "qwen/qwen-2.5-vl-7b-instruct:free",
-      "openai/gpt-4o-mini"
-    ];
+    document.addEventListener("DOMContentLoaded", function () {
+      const OPENROUTER_MODELS = [
+        "google/gemini-2.0-flash-exp:free",
+        "qwen/qwen-2.5-vl-7b-instruct:free",
+        "openai/gpt-4o-mini"
+      ];
 
-    let base64Image = "";
-    let imageMimeType = "image/jpeg";
-    let selectedOrigin = "تلقائي";
-    let selectedSize = "تلقائي";
-    let lastAnalyzedItems = [];
+      let base64Image = "";
+      let selectedOrigin = "تلقائي";
+      let selectedSize = "تلقائي";
+      let lastAnalyzedItems = [];
 
-    window.onload = () => {
-      const savedGemini = localStorage.getItem("gemini_api_key");
-      const savedOR = localStorage.getItem("openrouter_api_key");
-      if (savedGemini) document.getElementById("apiKeyInput").value = savedGemini;
-      if (savedOR) document.getElementById("openRouterKeyInput").value = savedOR;
-      if (!savedGemini && !savedOR) document.getElementById("settingsBox").classList.remove("hidden");
+      // تحميل المفاتيح والأرشيف
+      const savedGemini = localStorage.getItem("gemini_api_key") || "";
+      const savedOR = localStorage.getItem("openrouter_api_key") || "";
+      document.getElementById("apiKeyInput").value = savedGemini;
+      document.getElementById("openRouterKeyInput").value = savedOR;
+      if (!savedGemini && !savedOR) {
+        document.getElementById("settingsBox").classList.remove("hidden");
+      }
       updateArchiveCount();
-    };
 
-    function selectChip(type, val, el) {
-      if (type === "origin") selectedOrigin = val;
-      if (type === "size") selectedSize = val;
-      document.querySelectorAll(`.chip-${type}`).forEach(btn => {
-        btn.className = `chip-${type} bg-gray-100 text-gray-700 px-2.5 py-1 rounded-lg text-xs font-bold`;
+      // أزرار الشريط العلوي
+      document.getElementById("btnToggleSettings").addEventListener("click", () => {
+        document.getElementById("settingsBox").classList.toggle("hidden");
       });
-      el.className = `chip-${type} bg-teal-600 text-white px-2.5 py-1 rounded-lg text-xs font-bold`;
-    }
 
-    function toggleSettings() {
-      document.getElementById("settingsBox").classList.toggle("hidden");
-    }
+      document.getElementById("btnToggleArchive").addEventListener("click", () => {
+        const box = document.getElementById("archiveBox");
+        box.classList.toggle("hidden");
+        if (!box.classList.contains("hidden")) renderArchiveList();
+      });
 
-    function toggleArchive() {
-      const box = document.getElementById("archiveBox");
-      box.classList.toggle("hidden");
-      if (!box.classList.contains("hidden")) renderArchiveList();
-    }
+      document.getElementById("btnSaveKeys").addEventListener("click", () => {
+        const g = document.getElementById("apiKeyInput").value.trim();
+        const o = document.getElementById("openRouterKeyInput").value.trim();
+        if (!g && !o) return alert("يرجى إدخال مفتاح واحد على الأقل.");
+        localStorage.setItem("gemini_api_key", g);
+        localStorage.setItem("openrouter_api_key", o);
+        localStorage.removeItem("cached_fast_gemini_model");
+        alert("✅ تم حفظ المفاتيح بنجاح!");
+        document.getElementById("settingsBox").classList.add("hidden");
+      });
 
-    function saveKeys() {
-      const geminiKey = document.getElementById("apiKeyInput").value.trim();
-      const orKey = document.getElementById("openRouterKeyInput").value.trim();
-      if (!geminiKey && !orKey) return alert("يرجى إدخال مفتاح واحد على الأقل.");
-      localStorage.setItem("gemini_api_key", geminiKey);
-      localStorage.setItem("openrouter_api_key", orKey);
-      localStorage.removeItem("cached_fast_gemini_model");
-      alert("✅ تم الحفظ!");
-      document.getElementById("settingsBox").classList.add("hidden");
-    }
+      // التبويبات
+      document.getElementById("tabImage").addEventListener("click", () => {
+        document.getElementById("sectionImage").classList.remove("hidden");
+        document.getElementById("sectionText").classList.add("hidden");
+        document.getElementById("tabImage").classList.add("active");
+        document.getElementById("tabText").classList.remove("active");
+      });
 
-    function switchTab(tab) {
-      const isImg = tab === "image";
-      document.getElementById("section-image").classList.toggle("hidden", !isImg);
-      document.getElementById
+      document.getElementById("tabText").addEventListener("click", () => {
+        document.getElementById("sectionText").classList.remove("hidden");
+        document.getElementById("sectionImage").classList.add("hidden");
+        document.getElementById("tabText").classList.add("active");
+        document.getElementById("tabImage").classList.remove("active");
+      });
+
+      // أزرار المنشأ والحجم
+      document.querySelectorAll("#originGroup .chip").forEach(btn => {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll("#originGroup .chip").forEach(b => b.classList.remove("selected"));
+          this.classList.add("selected");
+          selectedOrigin = this.getAttribute("data-val");
+        });
+      });
+
+      document.querySelectorAll("#sizeGroup .chip").forEach(btn => {
+        btn.addEventListener("click", function () {
+          document.querySelectorAll("#sizeGroup .chip").forEach(b => b.classList.remove("selected"));
+          this.classList.add("selected");
+          selectedSize = this.getAttribute("data-val");
+        });
+      });
+
+      // أزرار الكاميرا والاستوديو
+      document.getElementById("btnOpenCamera").addEventListener("click", () => {
+        document.getElementById("cameraInput").click();
+      });
+      document.getElementById("btnOpenGallery").addEventListener("click", () => {
+        document.getElementById("galleryInput").click();
+      });
+
+      function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement("canvas");
+            const MAX_W = 800;
+            let w = img.width, h = img.height;
+            if (w > MAX_W) { h = Math.round((h * MAX_W) / w); w = MAX_W; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+            const dataUrl = canvas.toDataURL("image/jpeg", 0.75);
+            document.getElementById("imagePreview").src = dataUrl;
+            document.getElementById("imagePreviewBox").classList.remove("hidden");
+            base64Image = dataUrl.split(",")[1];
+            const kb = Math.round((base64Image.length * 3) / 4 / 1024);
+            document.getElementById("imageSizeInfo").innerText = `⚡ جاهزة للفحص (${kb} KB)`;
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      document.getElementById("cameraInput").addEventListener("change", handleFileSelect);
+      document.getElementById("galleryInput").addEventListener("change", handleFileSelect);
+
+      // الأرشيف
+      function getArchive() {
+        try { return JSON.parse(localStorage.getItem("supplier_price_archive") || "[]"); }
+        catch { return []; }
+      }
+      function updateArchiveCount() {
+        document.getElementById("archiveCount").innerText = getArchive().length;
+      }
+      function renderArchiveList() {
+        const q = document.getElementById("archiveSearch").value.trim().toLowerCase();
+        const list = getArchive().filter(x => x.name.toLowerCase().includes(q) || x.supplier.toLowerCase().includes(q));
+        const box = document.getElementById("archiveList");
+        if (!list.length) {
+          box.innerHTML = `<p style="text-align:center; color:#888;">لا توجد أسعار محفوظة.</p>`;
+          return;
+        }
+        box.innerHTML = list.map(x => `
+          <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee;">
+            <div><strong>${x.name}</strong><br><span style="color:#b45309;">🏢 ${x.supplier} • ${x.date}</span></div>
+            <div style="font-weight:bold; color:#008080;">${x.price}</div>
+          </div>
+        `).join("");
+      }
+      document.getElementById("archiveSearch").addEventListener("input", renderArchiveList);
+      document.getElementById("btnClearArchive").addEventListener("click", () => {
+        if (confirm("مسح جميع أسعار الموردين المحفوظة؟")) {
+          localStorage.removeItem("supplier_price_archive");
+          updateArchiveCount();
+          renderArchiveList();
+        }
+      });
+
+      // التحليل
+      function getPrompt(extra = "") {
+        const today = new Date().toLocaleDateString("ar-IQ", { year: "numeric", month: "long", day: "numeric" });
+        const stock = document.getElementById("currentStockInput").value || "0";
+        const arch = getArchive().slice(0, 25).map(a => `${a.name} (${a.supplier}: ${a.price})`).join(" | ");
+        return `أنت مستشار مشتريات لمكتب أثير العريبي (تجارة جملة ومفرد مواد منزلية وهدايا - الموصل).
+التاريخ: ${today}. المنشأ: ${selectedOrigin}. الحجم/النوع: ${selectedSize}. الرصيد الحالي: ${stock}.
+${extra ? "ملاحظة: " + extra : ""}
+${arch ? "أرشيف أسعار الموردين لدينا: [" + arch + "]" : ""}
+أرجع JSON Array فقط من الكائنات:
+[
+  {
+    "name": "اسم المنتج والمقاس باختصار",
+    "status_color": "green" أو "yellow" أو "red",
+    "verdict": "اشترِ فوراً (لقطة)" أو "سعر اعتيادي" أو "غالي / لا تشتري",
+    "current_supplier_price": "سعر المورد الحالي",
+    "target_buy_price": "سعر التفاوض الجيد",
+    "market_wholesale": "جملة السوق العراقي",
+    "our_wholesale": "سعر بيعنا جملة المقترح",
+    "market_retail": "مفرد السوق العراقي",
+    "season_and_demand": "الطلب والموسم",
+    "suggested_cartons": 2,
+    "qty_reason": "سبب الكمية (تغطية 20 يوماً)",
+    "archive_alert": "تنبيه إذا كان السعر مختلفاً عن أرشيف الموردين، وإلا اتركها فارغة"
+  }
+]`;
+      }
+
+      async function fetchModels(apiKey) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || "مفتاح Gemini غير صالح");
+        return (data.models || [])
+          .filter(m => m.supportedGenerationMethods?.includes("generateContent"))
+          .map(m => m.name.replace("models/", ""))
+          .filter(n => n.includes("gemini") && !n.includes("embedding"))
+          .sort((a, b) => (a.includes("lite") ? -1 : a.includes("flash") ? 0 : 1));
+      }
+
+      async function callGemini(model, apiKey, parts) {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: [{ parts }], generationConfig: { responseMimeType: "application/json", temperature: 0.1 } })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || "خطأ في Gemini");
+        return JSON.parse(data.candidates?.[0]?.content?.parts?.[0]?.text || "[]");
+      }
+
+      async function callOpenRouter(prompt, imgB64) {
+        const orKey = (localStorage.getItem("openrouter_api_key") || "").trim();
+        if (!orKey) throw new Error("لا يوجد مفتاح OpenRouter احتياطي.");
+        const content = imgB64 ? [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imgB64}` } }] : prompt;
+        for (const m of OPENROUTER_MODELS) {
+          try {
+            const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${orKey}`, "Content-Type": "application/json" },
+              body: JSON.stringify({ model: m, messages: [{ role: "user", content }] })
+            });
+            const data = await res.json();
+            if (!res.ok) continue;
+            const txt = (data.choices?.[0]?.message?.content || "[]").replace(/```json/gi, "").replace(/```/g, "").trim();
+            document.getElementById("usedModelBadge").innerText = "OR: " + m.split("/").pop();
+            document.getElementById("usedModelBadge").classList.remove("hidden");
+            return JSON.parse(txt);
+          } catch {}
+        }
+        throw new Error("تعذر الاتصال بجميع النماذج.");
+      }
+
+      async function executeAnalysis(prompt, imgB64 = "") {
+        const gKey = (localStorage.getItem("gemini_api_key") || "").trim();
+        const oKey = (localStorage.getItem("openrouter_api_key") || "").trim();
+        if (!gKey && !oKey) {
+          document.getElementById("settingsBox").classList.remove("hidden");
+          throw new Error("يرجى إدخال مفتاح API من زر ⚙️ المفاتيح في الأعلى.");
+        }
+
+        const t0 = performance.now();
+        let lastErr = null;
+        if (gKey) {
+          const parts = imgB64 ? [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: imgB64 } }] : [{ text: prompt }];
+          const cached = localStorage.getItem("cached_fast_gemini_model");
+          if (cached) {
+            try {
+              const r = await callGemini(cached, gKey, parts);
+              const s = ((performance.now() - t0) / 1000).toFixed(1);
+              document.getElementById("usedModelBadge").innerText = `${cached} • ${s}s`;
+              document.getElementById("usedModelBadge").classList.remove("hidden");
+              return r;
+            } catch (e) { localStorage.removeItem("cached_fast_gemini_model"); lastErr = e; }
+          }
+          try {
+            const models = await fetchModels(gKey);
+            for (const m of models) {
+              try {
+                const r = await callGemini(m, gKey, parts);
+                localStorage.setItem("cached_fast_gemini_model", m);
+                const s = ((performance.now() - t0) / 1000).toFixed(1);
+                document.getElementById("usedModelBadge").innerText = `${m} • ${s}s`;
+                document.getElementById("usedModelBadge").classList.remove("hidden");
+                return r;
+              } catch (e) { lastErr = e; }
+            }
+          } catch (e) { lastErr = e; }
+        }
+        if (oKey) return await callOpenRouter(prompt, imgB64);
+        throw lastErr || new Error("فشل الاتصال.");
+      }
+
+      function renderCards(items) {
+        lastAnalyzedItems = items || [];
+        const container = document.getElementById("cardsContainer");
+        if (!items || !items.length) {
+          container.innerHTML = `<div class="card" style="text-align:center; font-size:13px;">لم يتم العثور على منتجات واضحة.</div>`;
+          return;
+        }
+        container.innerHTML = items.map((it, i) => {
+          const cls = it.status_color === "green" ? "res-green" : it.status_color === "red" ? "res-red" : "";
+          const icon = it.status_color === "green" ? "🟢" : it.status_color === "red" ? "🔴" : "🟡";
+          return `
+            <div class="res-card ${cls}">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div>
+                  <span class="badge">${icon} ${it.verdict || "قيد التقييم"}</span>
+                  <h3 style="margin:6px 0 0 0; font-size:14px;">${it.name || "-"}</h3>
+                </div>
+                <button type="button" class="save-arch-btn" data-idx="${i}" style="background:#fef3c7; border:1px solid #f59e0b; color:#92400e; padding:6px 10px; border-radius:8px; font-size:11px; font-weight:bold; cursor:pointer;">💾 حفظ السعر</button>
+              </div>
+              ${it.archive_alert ? `<div style="background:#fffbeb; border:1px solid #fcd34d; color:#92400e; padding:7px; border-radius:8px; font-size:12px; font-weight:bold; margin-top:8px;">⚠️ ${it.archive_alert}</div>` : ""}
+              <div class="price-grid">
+                <div><span style="color:#666;">سعر المورد:</span><br><strong>${it.current_supplier_price || "-"}</strong></div>
+                <div><span style="color:#059669;">التفاوض الجيد:</span><br><strong style="color:#059669;">${it.target_buy_price || "-"}</strong></div>
+                <div><span style="color:#666;">جملة السوق:</span><br><strong style="color:#1d4ed8;">${it.market_wholesale || "-"}</strong></div>
+                <div style="background:#e6fffa; padding:3px 6px; border-radius:6px;"><span style="color:#008080;">بيعنا جملة:</span><br><strong style="color:#006666;">${it.our_wholesale || "-"}</strong></div>
+                <div><span style="color:#666;">مفرد السوق:</span><br><strong>${it.market_retail || "-"}</strong></div>
+                <div><span style="color:#666;">الموسم والطلب:</span><br><strong style="color:#6b21a8;">${it.season_and_demand || "-"}</strong></div>
+              </div>
+              <div style="background:#f0fdfa; padding:8px 10px; border-radius:8px; font-size:12px; font-weight:bold; color:#006666;">
+                📦 الكمية المقترحة: ${it.suggested_cartons || 1} كارتون (${it.qty_reason || "تغطية 20 يوماً"})
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        document.querySelectorAll(".save-arch-btn").forEach(btn => {
+          btn.addEventListener("click", function () {
+            const idx = parseInt(this.getAttribute("data-idx"), 10);
+            const item = lastAnalyzedItems[idx];
+            if (!item) return;
+            const sup = document.getElementById("supplierNameInput").value.trim() || prompt("اكتب اسم المورد (مثلاً: شركة الهدى):", "شركة الهدى");
+            if (!sup) return;
+            const arch = getArchive();
+            arch.unshift({ id: Date.now(), name: item.name, price: item.current_supplier_price, supplier: sup, date: new Date().toLocaleDateString("ar-IQ") });
+            localStorage.setItem("supplier_price_archive", JSON.stringify(arch.slice(0, 300)));
+            updateArchiveCount();
+            alert(`✅ تم حفظ (${item.name}) بسعر (${item.current_supplier_price}) باسم: ${sup}`);
+          });
+        });
+      }
+
+      async function startAnalysis(isImage) {
+        const btn = document.getElementById(isImage ? "btnAnalyzeImage" : "btnAnalyzeText");
+        if (isImage && !base64Image) return alert("يرجى التقاط صورة أو اختيارها من الاستوديو أولاً.");
+        const textVal = document.getElementById("textInput").value.trim();
+        if (!isImage && !textVal) return alert("يرجى كتابة اسم المنتج والسعر أولاً.");
+
+        document.getElementById("resultBox").classList.remove("hidden");
+        document.getElementById("loadingMsg").classList.remove("hidden");
+        document.getElementById("errorMsg").classList.add("hidden");
+        document.getElementById("cardsContainer").innerHTML = "";
+        btn.disabled = true;
+
+        try {
+          const prompt = isImage ? getPrompt(document.getElementById("imageNote").value.trim()) : getPrompt() + "\nالمدخل:\n" + textVal;
+          const items = await executeAnalysis(prompt, isImage ? base64Image : "");
+          renderCards(items);
+        } catch (err) {
+          const errBox = document.getElementById("errorMsg");
+          errBox.innerText = "❌ " + (err.message || err);
+          errBox.classList.remove("hidden");
+        } finally {
+          document.getElementById("loadingMsg").classList.add("hidden");
+          btn.disabled = false;
+        }
+      }
+
+      document.getElementById("btnAnalyzeImage").addEventListener("click", () => startAnalysis(true));
+      document.getElementById("btnAnalyzeText").addEventListener("click", () => startAnalysis(false));
+    });
+  </script>
+</body>
+</html>
