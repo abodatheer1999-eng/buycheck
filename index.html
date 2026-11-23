@@ -1,264 +1,282 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مفكرة الشراء الخاصة - مكتب أثير العريبي</title>
-    <style>
-        :root {
-            --primary: #008080; /* تركوازي هوية المحل */
-            --primary-dark: #006666;
-            --bg: #f4f7f6;
-            --card: #ffffff;
-            --text: #222222;
-            --border: #dce4e2;
-        }
-        * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .header {
-            background: var(--primary); color: white; padding: 15px;
-            border-radius: 12px; display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        .header h1 { margin: 0; font-size: 1.2rem; }
-        .header p { margin: 4px 0 0; font-size: 0.85rem; opacity: 0.9; }
-        .btn-key {
-            background: rgba(255,255,255,0.2); border: 1px solid white;
-            color: white; padding: 8px 12px; border-radius: 8px;
-            cursor: pointer; font-weight: bold; font-size: 0.9rem;
-        }
-        .card {
-            background: var(--card); border-radius: 12px; padding: 15px;
-            margin-bottom: 15px; border: 1px solid var(--border);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-        }
-        .key-box { display: none; border: 2px solid var(--primary); }
-        .key-box.active { display: block; }
-        .input-group { display: flex; gap: 8px; margin-top: 10px; }
-        input[type="text"], input[type="password"], textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border);
-            border-radius: 8px; font-size: 0.95rem;
-        }
-        .btn-primary {
-            background: var(--primary); color: white; border: none;
-            padding: 12px; border-radius: 8px; width: 100%;
-            font-size: 1rem; font-weight: bold; cursor: pointer; margin-top: 10px;
-        }
-        .btn-primary:disabled { background: #99b8b8; cursor: not-allowed; }
-        .btn-small {
-            background: var(--primary); color: white; border: none;
-            padding: 10px 16px; border-radius: 8px; font-weight: bold; cursor: pointer;
-        }
-        .tabs { display: flex; gap: 8px; margin-bottom: 15px; }
-        .tab {
-            flex: 1; padding: 10px; text-align: center; background: white;
-            border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-weight: bold;
-        }
-        .tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .hidden { display: none; }
-        .result-box {
-            margin-top: 15px; padding: 12px; background: #e8f5f5;
-            border-right: 4px solid var(--primary); border-radius: 8px;
-            white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem;
-        }
-        .status { font-size: 0.85rem; color: var(--primary); margin-top: 6px; font-weight: bold; }
-        .error { color: #d93025; background: #fce8e6; padding: 10px; border-radius: 8px; margin-top: 10px; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مفكرة الشراء الخاصة - أبو فيروزة</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #008080;
+      --primary-dark: #006666;
+      --bg: #f4f7f6;
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: var(--bg);
+      color: #222222;
+      margin: 0;
+      padding: 0;
+    }
+    .brand-bg { background-color: var(--primary); }
+    .brand-bg:hover { background-color: var(--primary-dark); }
+    .brand-text { color: var(--primary); }
+    .brand-border { border-color: var(--primary); }
+  </style>
 </head>
-<body>
+<body class="pb-12">
 
-    <div class="header">
-        <div>
-            <h1>مفكرة الشراء الخاصة - أبو فيروزة</h1>
-            <p>فحص سريع بالصورة أو النص قبل الشراء</p>
-        </div>
-        <button type="button" class="btn-key" id="toggleKeyBtn">⚙️ المفتاح</button>
+  <!-- الشريط العلوي -->
+  <header class="brand-bg text-white p-4 shadow-md sticky top-0 z-10">
+    <div class="max-w-xl mx-auto flex justify-between items-center">
+      <div>
+        <h1 class="text-lg font-extrabold">مفكرة الشراء الخاصة - أبو فيروزة</h1>
+        <p class="text-xs text-teal-100">فحص سريع بالصورة أو النص قبل الشراء</p>
+      </div>
+      <button onclick="toggleSettings()" class="bg-teal-700 hover:bg-teal-800 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1 shadow-sm">
+        ⚙️ المفتاح
+      </button>
     </div>
+  </header>
+
+  <main class="max-w-xl mx-auto p-4 space-y-4">
 
     <!-- صندوق إدخال المفتاح -->
-    <div class="card key-box" id="keySection">
-        <strong>مفتاح Gemini API Key:</strong>
-        <div class="input-group">
-            <input type="password" id="apiKeyInput" placeholder="الصق المفتاح هنا (AIzaSy...)">
-            <button type="button" class="btn-small" id="saveKeyBtn">حفظ</button>
-        </div>
-        <div class="status" id="keyStatus">محفوظ في جهازك الشخصي فقط.</div>
+    <div id="settingsBox" class="hidden bg-white p-4 rounded-xl shadow border border-teal-200">
+      <label class="block text-sm font-bold brand-text mb-1">مفتاح Gemini API Key:</label>
+      <div class="flex gap-2">
+        <input type="password" id="apiKeyInput" placeholder="ألصق المفتاح هنا (AIzaSy...)" class="w-full border rounded-lg px-3 py-2 text-sm text-left focus:outline-none focus:border-teal-600" dir="ltr" />
+        <button onclick="saveKey()" class="brand-bg text-white px-4 py-2 rounded-lg text-sm font-bold shrink-0">حفظ</button>
+      </div>
+      <p class="text-xs text-gray-500 mt-1">* يُحفظ في جهازك الشخصي فقط.</p>
     </div>
 
     <!-- التبويبات -->
-    <div class="tabs">
-        <div class="tab active" id="tabImgBtn">📸 فحص صورة</div>
-        <div class="tab" id="tabTxtBtn">📝 نص / قائمة</div>
+    <div class="grid grid-cols-2 gap-2 bg-white p-1.5 rounded-xl shadow-sm">
+      <button id="tab-image" onclick="switchTab('image')" class="brand-bg text-white py-2 rounded-lg text-sm font-bold transition">📸 فحص صورة</button>
+      <button id="tab-text" onclick="switchTab('text')" class="text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition">📝 نص / قائمة</button>
     </div>
 
     <!-- قسم فحص الصورة -->
-    <div class="card" id="imgSection">
-        <label><strong>التقط صورة أو اختر لقطة شاشة لمنتج أو قائمة:</strong></label>
-        <input type="file" id="imageInput" accept="image/*" style="margin-top:10px;">
-        <input type="text" id="imgNote" placeholder="ملاحظة إضافية (مثلاً: الأسعار بالجملة أو بالدينار)" style="margin-top:10px;">
-        <button type="button" class="btn-primary" id="analyzeImgBtn">🔍 استخرج وحلل المنتجات بالصورة</button>
+    <div id="section-image" class="bg-white p-4 rounded-xl shadow-sm space-y-3">
+      <label class="block text-sm font-bold text-gray-700">التقط صورة أو اختر لقطة شاشة لمنتج أو قائمة:</label>
+      <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)" class="block w-full text-sm text-gray-600 file:ml-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-bold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100 border rounded-lg p-1.5" />
+      
+      <div id="imagePreviewContainer" class="hidden">
+        <img id="imagePreview" class="max-h-60 mx-auto rounded-lg border shadow-sm object-contain" />
+      </div>
+
+      <input type="text" id="imageNote" placeholder="ملاحظة إضافية (مثلاً: الأسعار بالجملة أو بالدينار)" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-teal-600" />
+      
+      <button id="btnAnalyzeImage" onclick="analyzeImage()" class="w-full brand-bg text-white py-2.5 rounded-lg font-bold text-sm shadow">
+        🔍 استخرج وحلل المنتجات بالصورة
+      </button>
     </div>
 
     <!-- قسم فحص النص -->
-    <div class="card hidden" id="txtSection">
-        <label><strong>اكتب اسم المنتج أو الصق قائمة أسعار المورد:</strong></label>
-        <textarea id="textInput" rows="4" placeholder="مثال:&#10;مبشرة كهربائية - 7000&#10;منظم بهارات دوار 16 علبة - 14000" style="margin-top:10px;"></textarea>
-        <button type="button" class="btn-primary" id="analyzeTxtBtn">📊 افحص وحلل الأسعار الآن</button>
+    <div id="section-text" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3">
+      <label class="block text-sm font-bold text-gray-700">ألصق قائمة الأسعار أو تفاصيل المنتجات هنا:</label>
+      <textarea id="textInput" rows="5" placeholder="مثال:&#10;طقم بهارات 7 قطع بسعر 12,000&#10;ترمس شاي 1 لتر بسعر 9,500" class="w-full border rounded-lg p-3 text-sm focus:outline-none focus:border-teal-600"></textarea>
+      
+      <button id="btnAnalyzeText" onclick="analyzeText()" class="w-full brand-bg text-white py-2.5 rounded-lg font-bold text-sm shadow">
+        🔍 حلل القائمة والأسعار
+      </button>
     </div>
 
-    <!-- نتيجة التحليل -->
-    <div class="card hidden" id="outputCard">
-        <strong>نتيجة التحليل وتوصية الشراء:</strong>
-        <div id="outputContent" class="result-box"></div>
+    <!-- صندوق النتائج -->
+    <div id="resultBox" class="hidden bg-white p-4 rounded-xl shadow-sm space-y-3 border-t-4 brand-border">
+      <h2 class="font-extrabold text-base brand-text">نتيجة التحليل وتوصية الشراء:</h2>
+      <div id="loadingMsg" class="hidden text-center py-4 text-sm font-bold text-teal-700">
+        ⏳ جاري تحليل البيانات والأسعار...
+      </div>
+      <div id="errorMsg" class="hidden bg-red-50 text-red-700 p-3 rounded-lg text-xs font-bold leading-relaxed"></div>
+      
+      <div id="tableContainer" class="hidden overflow-x-auto">
+        <table class="w-full text-right border-collapse text-xs">
+          <thead>
+            <tr class="bg-teal-50 text-teal-900 border-b">
+              <th class="p-2">المنتج</th>
+              <th class="p-2">سعر العرض</th>
+              <th class="p-2">سعر السوق</th>
+              <th class="p-2">التقييم</th>
+            </tr>
+          </thead>
+          <tbody id="resultTableBody" class="divide-y"></tbody>
+        </table>
+      </div>
     </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const keySection = document.getElementById("keySection");
-        const apiKeyInput = document.getElementById("apiKeyInput");
-        const keyStatus = document.getElementById("keyStatus");
-        const toggleKeyBtn = document.getElementById("toggleKeyBtn");
-        const saveKeyBtn = document.getElementById("saveKeyBtn");
+  </main>
 
-        const tabImgBtn = document.getElementById("tabImgBtn");
-        const tabTxtBtn = document.getElementById("tabTxtBtn");
-        const imgSection = document.getElementById("imgSection");
-        const txtSection = document.getElementById("txtSection");
+  <script>
+    const MODEL_NAME = "gemini-3.8-flash";
+    let base64Image = "";
+    let imageMimeType = "";
 
-        const imageInput = document.getElementById("imageInput");
-        const imgNote = document.getElementById("imgNote");
-        const analyzeImgBtn = document.getElementById("analyzeImgBtn");
+    window.onload = () => {
+      const savedKey = localStorage.getItem("gemini_api_key");
+      if (savedKey) {
+        document.getElementById("apiKeyInput").value = savedKey;
+      } else {
+        document.getElementById("settingsBox").classList.remove("hidden");
+      }
+    };
 
-        const textInput = document.getElementById("textInput");
-        const analyzeTxtBtn = document.getElementById("analyzeTxtBtn");
+    function toggleSettings() {
+      document.getElementById("settingsBox").classList.toggle("hidden");
+    }
 
-        const outputCard = document.getElementById("outputCard");
-        const outputContent = document.getElementById("outputContent");
+    function saveKey() {
+      const key = document.getElementById("apiKeyInput").value.trim();
+      if (!key) return alert("يرجى إدخال المفتاح أولاً.");
+      localStorage.setItem("gemini_api_key", key);
+      alert("✅ تم حفظ المفتاح بنجاح!");
+      document.getElementById("settingsBox").classList.add("hidden");
+    }
 
-        // تحميل المفتاح المحفوظ أو إظهار الصندوق تلقائياً إذا لم يوجد مفتاح
-        const savedKey = localStorage.getItem("gemini_api_key");
-        if (savedKey) {
-            apiKeyInput.value = savedKey;
-            keyStatus.textContent = "✅ المفتاح محفوظ وجاهز للعمل.";
-        } else {
-            keySection.classList.add("active");
-            keyStatus.textContent = "⚠️ يرجى لصق مفتاح Gemini API والضغط على حفظ.";
-        }
+    function switchTab(tab) {
+      const isImg = tab === "image";
+      document.getElementById("section-image").classList.toggle("hidden", !isImg);
+      document.getElementById("section-text").classList.toggle("hidden", isImg);
+      
+      document.getElementById("tab-image").className = isImg 
+        ? "brand-bg text-white py-2 rounded-lg text-sm font-bold transition" 
+        : "text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition";
+      document.getElementById("tab-text").className = !isImg 
+        ? "brand-bg text-white py-2 rounded-lg text-sm font-bold transition" 
+        : "text-gray-600 hover:bg-gray-100 py-2 rounded-lg text-sm font-bold transition";
+    }
 
-        // فتح/إغلاق خانة المفتاح
-        toggleKeyBtn.addEventListener("click", () => {
-            keySection.classList.toggle("active");
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      imageMimeType = file.type;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById("imagePreview").src = e.target.result;
+        document.getElementById("imagePreviewContainer").classList.remove("hidden");
+        base64Image = e.target.result.split(",")[1];
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function callGemini(parts) {
+      const apiKey = (localStorage.getItem("gemini_api_key") || "").trim();
+      if (!apiKey) {
+        document.getElementById("settingsBox").classList.remove("hidden");
+        throw new Error("يرجى إدخال وحفظ مفتاح Gemini API Key أولاً.");
+      }
+
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL_NAME}:generateContent?key=${apiKey}`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ parts }],
+          generationConfig: { responseMimeType: "application/json" }
+        })
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error?.message || "حدث خطأ أثناء الاتصال بالخادم.");
+      }
+
+      const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+      return JSON.parse(rawText);
+    }
+
+    function getPrompt(extraNote = "") {
+      return `أنت خبير تسعير ومشتريات مواد منزلية وهدايا في السوق العراقي (الموصل).
+حلل المنتجات والأسعار الموجودة في المدخلات التالية. ${extraNote ? "ملاحظة المستخدم: " + extraNote : ""}
+أرجع النتيجة حصرياً بصيغة JSON Array من الكائنات، بحيث يحتوي كل كائن على الحقول التالية فقط:
+[
+  {
+    "name": "اسم المنتج والمواصفات باختصار",
+    "offer_price": "السعر المعروض",
+    "market_price": "تقدير سعر الجملة/السوق العراقي",
+    "decision": "✅ فرصة ممتازة" أو "⚖️ سعر مناسب" أو "❌ غالي / لا يُنصح"
+  }
+]`;
+    }
+
+    function renderTable(items) {
+      const tbody = document.getElementById("resultTableBody");
+      tbody.innerHTML = "";
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-gray-500">لم يتم العثور على منتجات واضحة.</td></tr>`;
+      } else {
+        items.forEach(item => {
+          tbody.innerHTML += `
+            <tr class="hover:bg-gray-50">
+              <td class="p-2 font-bold text-gray-800">${item.name || "-"}</td>
+              <td class="p-2 text-teal-700 font-bold">${item.offer_price || "-"}</td>
+              <td class="p-2 text-gray-600">${item.market_price || "-"}</td>
+              <td class="p-2 font-bold">${item.decision || "-"}</td>
+            </tr>
+          `;
         });
+      }
+      document.getElementById("tableContainer").classList.remove("hidden");
+    }
 
-        // حفظ المفتاح
-        saveKeyBtn.addEventListener("click", () => {
-            const val = apiKeyInput.value.trim();
-            if (!val) {
-                alert("الرجاء لصق المفتاح أولاً!");
-                return;
-            }
-            localStorage.setItem("gemini_api_key", val);
-            keyStatus.textContent = "✅ تم حفظ المفتاح بنجاح!";
-            setTimeout(() => keySection.classList.remove("active"), 1000);
-        });
+    async function analyzeImage() {
+      if (!base64Image) return alert("يرجى اختيار صورة أولاً.");
+      const note = document.getElementById("imageNote").value.trim();
+      const btn = document.getElementById("btnAnalyzeImage");
+      
+      prepareUI(btn, true);
+      try {
+        const parts = [
+          { text: getPrompt(note) },
+          { inlineData: { mimeType: imageMimeType, data: base64Image } }
+        ];
+        const items = await callGemini(parts);
+        renderTable(items);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        prepareUI(btn, false, "🔍 استخرج وحلل المنتجات بالصورة");
+      }
+    }
 
-        // التبديل بين الصورة والنص
-        tabImgBtn.addEventListener("click", () => {
-            tabImgBtn.classList.add("active");
-            tabTxtBtn.classList.remove("active");
-            imgSection.classList.remove("hidden");
-            txtSection.classList.add("hidden");
-        });
+    async function analyzeText() {
+      const text = document.getElementById("textInput").value.trim();
+      if (!text) return alert("يرجى إدخال نص القائمة أولاً.");
+      const btn = document.getElementById("btnAnalyzeText");
 
-        tabTxtBtn.addEventListener("click", () => {
-            tabTxtBtn.classList.add("active");
-            tabImgBtn.classList.remove("active");
-            txtSection.classList.remove("hidden");
-            imgSection.classList.add("hidden");
-        });
+      prepareUI(btn, true);
+      try {
+        const parts = [{ text: getPrompt() + "\n\nالنص المطلوب تحليله:\n" + text }];
+        const items = await callGemini(parts);
+        renderTable(items);
+      } catch (err) {
+        showError(err.message);
+      } finally {
+        prepareUI(btn, false, "🔍 حلل القائمة والأسعار");
+      }
+    }
 
-        // تحويل الصورة إلى Base64
-        function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result.split(",")[1]);
-                reader.onerror = error => reject(error);
-                reader.readAsDataURL(file);
-            });
-        }
+    function prepareUI(btn, isLoading, defaultText = "") {
+      document.getElementById("resultBox").classList.remove("hidden");
+      document.getElementById("loadingMsg").classList.toggle("hidden", !isLoading);
+      if (isLoading) {
+        document.getElementById("errorMsg").classList.add("hidden");
+        document.getElementById("tableContainer").classList.add("hidden");
+        btn.disabled = true;
+        btn.innerText = "⏳ جاري التحليل...";
+      } else {
+        btn.disabled = false;
+        btn.innerText = defaultText;
+      }
+    }
 
-        // الاتصال بـ Gemini API
-        async function callGemini(parts) {
-            const apiKey = localStorage.getItem("gemini_api_key");
-            if (!apiKey) {
-                keySection.classList.add("active");
-                alert("يرجى إدخال وحفظ مفتاح Gemini API أولاً.");
-                return;
-            }
-
-            outputCard.classList.remove("hidden");
-            outputContent.className = "result-box";
-            outputContent.textContent = "⏳ جاري تحليل البيانات والأسعار...";
-
-            const systemPrompt = "أنت مساعد مشتريات ذكي لمكتب أثير العريبي لتجارة المواد المنزلية والديكور في الموصل. استخرج أسماء المنتجات، الكود، التعبئة، والأسعار بدقة، ثم قارن الجدوى التجارية وقدم توصية واضحة للشراء باللغة العربية.";
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: systemPrompt }, ...parts] }]
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.error?.message || "حدث خطأ في الاتصال بالخادم");
-                }
-
-                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || "لم يتم استلام رد واضح.";
-                outputContent.textContent = reply;
-            } catch (err) {
-                outputContent.className = "error";
-                outputContent.textContent = "❌ خطأ: " + err.message + "\nتأكد من صحة المفتاح أو اتصال الإنترنت.";
-            }
-        }
-
-        // زر تحليل الصورة
-        analyzeImgBtn.addEventListener("click", async () => {
-            const file = imageInput.files[0];
-            if (!file) {
-                alert("يرجى اختيار صورة أولاً!");
-                return;
-            }
-            analyzeImgBtn.disabled = true;
-            try {
-                const base64Data = await fileToBase64(file);
-                const note = imgNote.value.trim() ? `ملاحظة إضافية: ${imgNote.value}` : "استخرج كل المنتجات والأسعار من هذه الصورة وحللها.";
-                await callGemini([
-                    { text: note },
-                    { inlineData: { mimeType: file.type, data: base64Data } }
-                ]);
-            } finally {
-                analyzeImgBtn.disabled = false;
-            }
-        });
-
-        // زر تحليل النص
-        analyzeTxtBtn.addEventListener("click", async () => {
-            const txt = textInput.value.trim();
-            if (!txt) {
-                alert("يرجى كتابة أو لصق النص أولاً!");
-                return;
-            }
-            analyzeTxtBtn.disabled = true;
-            try {
-                await callGemini([{ text: `حلل قائمة المنتجات والأسعار التالية:\n${txt}` }]);
-            } finally {
-                analyzeTxtBtn.disabled = false;
-            }
-        });
-    });
-</script>
+    function showError(msg) {
+      const errBox = document.getElementById("errorMsg");
+      errBox.innerText = "❌ خطأ: " + msg + " (تأكد من صحة المفتاح أو اتصال الإنترنت).";
+      errBox.classList.remove("hidden");
+    }
+  </script>
 </body>
 </html>
